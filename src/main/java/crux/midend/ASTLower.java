@@ -20,8 +20,9 @@ import java.util.stream.Collectors;
  */
 
 // Hint: You might want to change the Void parameter of the
-// NodeVisitor and the visit methods to some other class so that
-// the visit methods can return information to the caller.
+// NodeVisitor and the return type of the visit methods to some other
+// class so that the visit methods can return information to the
+// caller.
 
 public final class ASTLower implements NodeVisitor<Void> {
   private Program mCurrentProgram = null;
