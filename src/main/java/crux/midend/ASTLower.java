@@ -16,8 +16,12 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 /**
- * Convert AST to IR and build the CFG
+ * Convert AST to IR and build the CFG.
  */
+
+// Hint: You might want to change the Void parameter of the
+// NodeVisitor and the visit methods to some other class so that
+// the visit methods can return information to the caller.
 
 public final class ASTLower implements NodeVisitor<Void> {
   private Program mCurrentProgram = null;
