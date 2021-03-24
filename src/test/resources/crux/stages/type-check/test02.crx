@@ -1,0 +1,5 @@
+// test built in
+
+void main() {
+  printInt(42);
+}

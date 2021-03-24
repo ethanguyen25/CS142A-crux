@@ -1,0 +1,14 @@
+ast.DeclarationList(2)
+  ast.ArrayDeclaration(2)[Symbol(x)]
+  ast.FunctionDefinition(4)[Symbol(main), []]
+    ast.StatementList(5)
+      ast.Assignment(5)
+        ast.ArrayAccess(5)
+          ast.Name(5)[x]
+          ast.LiteralInt(5)[1]
+        ast.LiteralInt(5)[42]
+      ast.Call(6)[Symbol(printInt)]
+        ast.Dereference(6)
+          ast.ArrayAccess(6)
+            ast.Name(6)[x]
+            ast.LiteralInt(6)[1]

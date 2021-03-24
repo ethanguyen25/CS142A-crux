@@ -1,0 +1,60 @@
+Crux Program has no type errors.
+ast.DeclarationList(3)
+  ast.ArrayDeclaration(3)[Symbol(a:array[3,int])]
+  ast.FunctionDefinition(5)[Symbol(test:func(TypeList()):int), []]
+    ast.StatementList(6)
+      void: ast.Assignment(6)
+        Address(int): ast.ArrayAccess(6)
+          Address(array[3,int]): ast.Name(6)[a]
+          int: ast.LiteralInt(6)[1]
+        int: ast.LiteralInt(6)[0]
+      ast.Return(7)
+        int: ast.LiteralInt(7)[2]
+  ast.FunctionDefinition(10)[Symbol(main:func(TypeList()):void), []]
+    ast.StatementList(11)
+      void: ast.Assignment(11)
+        Address(int): ast.ArrayAccess(11)
+          Address(array[3,int]): ast.Name(11)[a]
+          int: ast.LiteralInt(11)[0]
+        int: ast.LiteralInt(11)[1]
+      void: ast.Assignment(12)
+        Address(int): ast.ArrayAccess(12)
+          Address(array[3,int]): ast.Name(12)[a]
+          int: ast.LiteralInt(12)[1]
+        int: ast.LiteralInt(12)[2]
+      void: ast.Assignment(13)
+        Address(int): ast.ArrayAccess(13)
+          Address(array[3,int]): ast.Name(13)[a]
+          int: ast.LiteralInt(13)[2]
+        int: ast.LiteralInt(13)[3]
+      void: ast.Assignment(14)
+        Address(int): ast.ArrayAccess(14)
+          Address(array[3,int]): ast.Name(14)[a]
+          int: ast.Dereference(14)
+            Address(int): ast.ArrayAccess(14)
+              Address(array[3,int]): ast.Name(14)[a]
+              int: ast.LiteralInt(14)[1]
+        int: ast.OpExpr(14)[ADD]
+          int: ast.Dereference(14)
+            Address(int): ast.ArrayAccess(14)
+              Address(array[3,int]): ast.Name(14)[a]
+              int: ast.LiteralInt(14)[1]
+          int: ast.Call(14)[Symbol(test)]
+      void: ast.Call(15)[Symbol(printInt)]
+        int: ast.Dereference(15)
+          Address(int): ast.ArrayAccess(15)
+            Address(array[3,int]): ast.Name(15)[a]
+            int: ast.LiteralInt(15)[0]
+      void: ast.Call(16)[Symbol(println)]
+      void: ast.Call(17)[Symbol(printInt)]
+        int: ast.Dereference(17)
+          Address(int): ast.ArrayAccess(17)
+            Address(array[3,int]): ast.Name(17)[a]
+            int: ast.LiteralInt(17)[1]
+      void: ast.Call(18)[Symbol(println)]
+      void: ast.Call(19)[Symbol(printInt)]
+        int: ast.Dereference(19)
+          Address(int): ast.ArrayAccess(19)
+            Address(array[3,int]): ast.Name(19)[a]
+            int: ast.LiteralInt(19)[2]
+      void: ast.Call(20)[Symbol(println)]

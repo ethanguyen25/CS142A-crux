@@ -1,0 +1,6 @@
+// test global variable with mips instruction name
+int addi;
+void main() {
+  addi = readInt();
+  printInt(addi);
+}

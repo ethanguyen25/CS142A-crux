@@ -1,0 +1,36 @@
+// test arithmetic
+
+void test(int a, int b) {
+  printInt(a + b);
+  println();
+  printInt(a - b);
+  println();
+  printInt(a * b);
+  println();
+  if (b != 0) {
+    printInt(a / b);
+    println();
+  } else {
+    println();
+  }
+}
+
+void main() {
+  int i;
+  int j;
+  i = 0;
+  loop {
+    if (i > 10) {
+      break;
+    }
+    j = 0;
+    loop {
+       if (j > 10) {
+         break;
+       }
+       test(i, j);
+       j = j + 1;
+    }
+    i = i + 1;
+  }
+}

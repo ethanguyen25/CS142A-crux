@@ -1,0 +1,126 @@
+Crux Program has no type errors.
+ast.DeclarationList(3)
+  ast.ArrayDeclaration(3)[Symbol(x:array[5,int])]
+  ast.FunctionDefinition(5)[Symbol(main:func(TypeList()):void), []]
+    ast.StatementList(6)
+      ast.VariableDeclaration(6)[Symbol(canary_begin:int)]
+      ast.VariableDeclaration(7)[Symbol(canary_end:int)]
+      ast.VariableDeclaration(8)[Symbol(outer:int)]
+      ast.VariableDeclaration(9)[Symbol(inner:int)]
+      void: ast.Assignment(10)
+        Address(int): ast.Name(10)[canary_begin]
+        int: ast.LiteralInt(10)[0]
+      void: ast.Assignment(11)
+        Address(int): ast.Name(11)[canary_end]
+        int: ast.LiteralInt(11)[0]
+      void: ast.Assignment(13)
+        Address(int): ast.Name(13)[outer]
+        int: ast.LiteralInt(13)[4]
+      void: ast.Assignment(14)
+        Address(int): ast.Name(14)[inner]
+        int: ast.LiteralInt(14)[2]
+      ast.Loop(15)
+        ast.StatementList(16)
+          ast.IfElseBranch(16)
+            bool: ast.OpExpr(16)[LT]
+              int: ast.Dereference(16)
+                Address(int): ast.Name(16)[outer]
+              int: ast.LiteralInt(16)[0]
+            ast.StatementList(17)
+              ast.Break(17)
+            ast.StatementList(16)
+          ast.Loop(19)
+            ast.StatementList(20)
+              ast.IfElseBranch(20)
+                bool: ast.OpExpr(20)[LT]
+                  int: ast.Dereference(20)
+                    Address(int): ast.Name(20)[inner]
+                  int: ast.LiteralInt(20)[0]
+                ast.StatementList(21)
+                  ast.Break(21)
+                ast.StatementList(20)
+              void: ast.Assignment(23)
+                Address(int): ast.ArrayAccess(23)
+                  Address(array[5,int]): ast.Name(23)[x]
+                  int: ast.Dereference(23)
+                    Address(int): ast.Name(23)[outer]
+                int: ast.OpExpr(23)[ADD]
+                  int: ast.OpExpr(23)[ADD]
+                    int: ast.OpExpr(23)[MULT]
+                      int: ast.Dereference(23)
+                        Address(int): ast.Name(23)[inner]
+                      int: ast.LiteralInt(23)[1000]
+                    int: ast.OpExpr(23)[MULT]
+                      int: ast.Dereference(23)
+                        Address(int): ast.Name(23)[outer]
+                      int: ast.LiteralInt(23)[100]
+                  int: ast.LiteralInt(23)[99]
+              void: ast.Assignment(24)
+                Address(int): ast.Name(24)[inner]
+                int: ast.OpExpr(24)[SUB]
+                  int: ast.Dereference(24)
+                    Address(int): ast.Name(24)[inner]
+                  int: ast.LiteralInt(24)[1]
+          void: ast.Assignment(26)
+            Address(int): ast.Name(26)[inner]
+            int: ast.LiteralInt(26)[2]
+          void: ast.Assignment(27)
+            Address(int): ast.Name(27)[outer]
+            int: ast.OpExpr(27)[SUB]
+              int: ast.Dereference(27)
+                Address(int): ast.Name(27)[outer]
+              int: ast.LiteralInt(27)[1]
+      void: ast.Assignment(30)
+        Address(int): ast.Name(30)[inner]
+        int: ast.LiteralInt(30)[0]
+      void: ast.Assignment(31)
+        Address(int): ast.Name(31)[outer]
+        int: ast.LiteralInt(31)[0]
+      ast.Loop(32)
+        ast.StatementList(33)
+          ast.IfElseBranch(33)
+            bool: ast.OpExpr(33)[GE]
+              int: ast.Dereference(33)
+                Address(int): ast.Name(33)[outer]
+              int: ast.LiteralInt(33)[5]
+            ast.StatementList(34)
+              ast.Break(34)
+            ast.StatementList(33)
+          ast.Loop(36)
+            ast.StatementList(37)
+              ast.IfElseBranch(37)
+                bool: ast.OpExpr(37)[GE]
+                  int: ast.Dereference(37)
+                    Address(int): ast.Name(37)[inner]
+                  int: ast.LiteralInt(37)[3]
+                ast.StatementList(38)
+                  ast.Break(38)
+                ast.StatementList(37)
+              void: ast.Call(40)[Symbol(printInt)]
+                int: ast.Dereference(40)
+                  Address(int): ast.ArrayAccess(40)
+                    Address(array[5,int]): ast.Name(40)[x]
+                    int: ast.Dereference(40)
+                      Address(int): ast.Name(40)[outer]
+              void: ast.Assignment(41)
+                Address(int): ast.Name(41)[inner]
+                int: ast.OpExpr(41)[ADD]
+                  int: ast.Dereference(41)
+                    Address(int): ast.Name(41)[inner]
+                  int: ast.LiteralInt(41)[1]
+          void: ast.Call(43)[Symbol(println)]
+          void: ast.Assignment(44)
+            Address(int): ast.Name(44)[inner]
+            int: ast.LiteralInt(44)[0]
+          void: ast.Assignment(45)
+            Address(int): ast.Name(45)[outer]
+            int: ast.OpExpr(45)[ADD]
+              int: ast.Dereference(45)
+                Address(int): ast.Name(45)[outer]
+              int: ast.LiteralInt(45)[1]
+      void: ast.Call(47)[Symbol(printInt)]
+        int: ast.Dereference(47)
+          Address(int): ast.Name(47)[canary_begin]
+      void: ast.Call(48)[Symbol(printInt)]
+        int: ast.Dereference(48)
+          Address(int): ast.Name(48)[canary_end]

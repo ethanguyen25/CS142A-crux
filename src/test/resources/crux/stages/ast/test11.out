@@ -1,0 +1,9 @@
+ast.DeclarationList(3)
+  ast.FunctionDefinition(3)[Symbol(main), []]
+    ast.StatementList(4)
+      ast.Call(4)[Symbol(printInt)]
+        ast.LiteralInt(4)[7]
+      ast.Call(5)[Symbol(printBool)]
+        ast.LiteralBool(5)[TRUE]
+      ast.Call(6)[Symbol(println)]
+      ast.Call(7)[Symbol(readInt)]

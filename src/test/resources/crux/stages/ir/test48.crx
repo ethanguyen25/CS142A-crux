@@ -1,0 +1,22 @@
+// non-recursive fib
+
+void main() {
+  int i;
+  i = 0;
+  int a;
+  int b;
+  a = 0;
+  b = 1;
+  loop {
+    if (i >= 10) {
+      break;
+    }
+    printInt(b);
+    println();
+    int c;
+    c = a + b;
+    a = b;
+    b = c;
+    i = i + 1;
+  }
+}

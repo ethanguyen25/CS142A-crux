@@ -1,0 +1,19 @@
+// test nested (boolean) expression
+
+int a;
+int b[1];
+
+
+bool foo() {
+  return false;
+}
+
+
+void  main() {
+  a = 0;
+  b[0] = 1;
+  bool c;
+  if (((((true))))) {
+     c = (1 > (b[0] - a)) || (foo() || (((true))));
+  }
+}

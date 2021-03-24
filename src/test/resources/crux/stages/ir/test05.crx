@@ -1,0 +1,9 @@
+
+// test declaration
+
+int global;
+bool a[5];
+
+void main() {
+
+}

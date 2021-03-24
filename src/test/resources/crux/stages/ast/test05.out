@@ -1,0 +1,5 @@
+ast.DeclarationList(4)
+  ast.VariableDeclaration(4)[Symbol(global)]
+  ast.ArrayDeclaration(5)[Symbol(a)]
+  ast.FunctionDefinition(7)[Symbol(main), []]
+    ast.StatementList(9)

@@ -1,0 +1,23 @@
+ast.DeclarationList(3)
+  ast.FunctionDefinition(3)[Symbol(rec), [Symbol(a)]]
+    ast.StatementList(4)
+      ast.IfElseBranch(4)
+        ast.OpExpr(4)[GT]
+          ast.Dereference(4)
+            ast.Name(4)[a]
+          ast.LiteralInt(4)[0]
+        ast.StatementList(5)
+          ast.Call(5)[Symbol(rec)]
+            ast.OpExpr(5)[SUB]
+              ast.Dereference(5)
+                ast.Name(5)[a]
+              ast.LiteralInt(5)[1]
+        ast.StatementList(4)
+      ast.Call(7)[Symbol(printInt)]
+        ast.Dereference(7)
+          ast.Name(7)[a]
+      ast.Call(8)[Symbol(println)]
+  ast.FunctionDefinition(11)[Symbol(main), []]
+    ast.StatementList(12)
+      ast.Call(12)[Symbol(rec)]
+        ast.LiteralInt(12)[5]

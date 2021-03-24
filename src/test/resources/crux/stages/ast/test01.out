@@ -1,0 +1,3 @@
+ast.DeclarationList(4)
+  ast.FunctionDefinition(4)[Symbol(main), []]
+    ast.StatementList(6)

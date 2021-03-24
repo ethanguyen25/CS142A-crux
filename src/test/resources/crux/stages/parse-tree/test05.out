@@ -1,0 +1,14 @@
+program
+  declarationList
+    declaration
+      variableDeclaration
+        type
+    declaration
+      arrayDeclaration
+        type
+    declaration
+      functionDefinition
+        type
+        parameterList
+        statementBlock
+          statementList

@@ -1,0 +1,31 @@
+ast.DeclarationList(3)
+  ast.FunctionDefinition(3)[Symbol(validReturn1), [Symbol(a)]]
+    ast.StatementList(4)
+      ast.IfElseBranch(4)
+        ast.LiteralBool(4)[TRUE]
+        ast.StatementList(5)
+          ast.IfElseBranch(5)
+            ast.LiteralBool(5)[FALSE]
+            ast.StatementList(6)
+              ast.Assignment(6)
+                ast.Name(6)[a]
+                ast.LiteralInt(6)[3]
+            ast.StatementList(8)
+              ast.Loop(8)
+                ast.StatementList(9)
+                  ast.Return(9)
+                    ast.Dereference(9)
+                      ast.Name(9)[a]
+          ast.Return(12)
+            ast.LiteralInt(12)[4]
+        ast.StatementList(14)
+          ast.Return(14)
+            ast.Dereference(14)
+              ast.Name(14)[a]
+  ast.FunctionDefinition(18)[Symbol(main), []]
+    ast.StatementList(19)
+      ast.Call(19)[Symbol(printInt)]
+        ast.LiteralInt(19)[3]
+      ast.Call(20)[Symbol(printInt)]
+        ast.Call(20)[Symbol(validReturn1)]
+          ast.LiteralInt(20)[6]

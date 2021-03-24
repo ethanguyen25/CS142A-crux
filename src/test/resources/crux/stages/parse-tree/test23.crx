@@ -1,0 +1,11 @@
+// test assignments (including simple array assigments)
+
+int a;
+bool b;
+int c[1];
+
+void main() {
+  a = 0;
+  b = false;
+  c[0] = 0;
+}

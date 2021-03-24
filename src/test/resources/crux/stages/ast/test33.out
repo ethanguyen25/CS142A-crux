@@ -1,0 +1,37 @@
+ast.DeclarationList(2)
+  ast.FunctionDefinition(2)[Symbol(myTrue), []]
+    ast.StatementList(3)
+      ast.Call(3)[Symbol(printInt)]
+        ast.LiteralInt(3)[1]
+      ast.Call(4)[Symbol(println)]
+      ast.Return(5)
+        ast.LiteralBool(5)[TRUE]
+  ast.FunctionDefinition(8)[Symbol(myFalse), []]
+    ast.StatementList(9)
+      ast.Call(9)[Symbol(printInt)]
+        ast.LiteralInt(9)[0]
+      ast.Call(10)[Symbol(println)]
+      ast.Return(11)
+        ast.LiteralBool(11)[FALSE]
+  ast.FunctionDefinition(14)[Symbol(main), []]
+    ast.StatementList(15)
+      ast.Call(15)[Symbol(printBool)]
+        ast.OpExpr(15)[LOGIC_AND]
+          ast.Call(15)[Symbol(myTrue)]
+          ast.Call(15)[Symbol(myTrue)]
+      ast.Call(16)[Symbol(println)]
+      ast.Call(17)[Symbol(printBool)]
+        ast.OpExpr(17)[LOGIC_AND]
+          ast.Call(17)[Symbol(myFalse)]
+          ast.Call(17)[Symbol(myTrue)]
+      ast.Call(18)[Symbol(println)]
+      ast.Call(19)[Symbol(printBool)]
+        ast.OpExpr(19)[LOGIC_AND]
+          ast.Call(19)[Symbol(myTrue)]
+          ast.Call(19)[Symbol(myFalse)]
+      ast.Call(20)[Symbol(println)]
+      ast.Call(21)[Symbol(printBool)]
+        ast.OpExpr(21)[LOGIC_AND]
+          ast.Call(21)[Symbol(myFalse)]
+          ast.Call(21)[Symbol(myFalse)]
+      ast.Call(22)[Symbol(println)]

@@ -1,0 +1,49 @@
+Crux Program has no type errors.
+ast.DeclarationList(2)
+  ast.VariableDeclaration(2)[Symbol(canary_begin:int)]
+  ast.ArrayDeclaration(3)[Symbol(x:array[3,int])]
+  ast.VariableDeclaration(4)[Symbol(canary_end:int)]
+  ast.FunctionDefinition(6)[Symbol(main:func(TypeList()):void), []]
+    ast.StatementList(7)
+      void: ast.Assignment(7)
+        Address(int): ast.Name(7)[canary_begin]
+        int: ast.LiteralInt(7)[0]
+      void: ast.Assignment(8)
+        Address(int): ast.Name(8)[canary_end]
+        int: ast.LiteralInt(8)[0]
+      void: ast.Assignment(9)
+        Address(int): ast.ArrayAccess(9)
+          Address(array[3,int]): ast.Name(9)[x]
+          int: ast.LiteralInt(9)[0]
+        int: ast.LiteralInt(9)[222]
+      void: ast.Assignment(10)
+        Address(int): ast.ArrayAccess(10)
+          Address(array[3,int]): ast.Name(10)[x]
+          int: ast.LiteralInt(10)[1]
+        int: ast.LiteralInt(10)[333]
+      void: ast.Assignment(11)
+        Address(int): ast.ArrayAccess(11)
+          Address(array[3,int]): ast.Name(11)[x]
+          int: ast.LiteralInt(11)[2]
+        int: ast.LiteralInt(11)[444]
+      void: ast.Call(12)[Symbol(printInt)]
+        int: ast.Dereference(12)
+          Address(int): ast.Name(12)[canary_begin]
+      void: ast.Call(13)[Symbol(printInt)]
+        int: ast.Dereference(13)
+          Address(int): ast.ArrayAccess(13)
+            Address(array[3,int]): ast.Name(13)[x]
+            int: ast.LiteralInt(13)[0]
+      void: ast.Call(14)[Symbol(printInt)]
+        int: ast.Dereference(14)
+          Address(int): ast.ArrayAccess(14)
+            Address(array[3,int]): ast.Name(14)[x]
+            int: ast.LiteralInt(14)[1]
+      void: ast.Call(15)[Symbol(printInt)]
+        int: ast.Dereference(15)
+          Address(int): ast.ArrayAccess(15)
+            Address(array[3,int]): ast.Name(15)[x]
+            int: ast.LiteralInt(15)[2]
+      void: ast.Call(16)[Symbol(printInt)]
+        int: ast.Dereference(16)
+          Address(int): ast.Name(16)[canary_end]

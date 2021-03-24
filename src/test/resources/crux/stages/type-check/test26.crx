@@ -1,0 +1,17 @@
+// test loop
+
+int a;
+
+void main() {
+  a = 9;
+  loop {
+    if (a == 0) {
+      break;
+    }
+    printInt(a);
+    println();
+    a = a-1;
+  }
+  printInt(0-5);
+  printInt(a);
+}

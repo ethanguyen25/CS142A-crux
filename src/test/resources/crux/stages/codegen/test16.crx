@@ -1,0 +1,11 @@
+// shadow global with local
+
+int a;
+
+void main() {
+  a = 1;
+
+  int a;
+  a = 2;
+  printInt(a);
+}

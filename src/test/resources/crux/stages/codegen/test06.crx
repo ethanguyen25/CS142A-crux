@@ -1,0 +1,8 @@
+// test global variable
+
+int i;
+
+void main() {
+  i = 10;
+  printInt(i);
+}

@@ -1,0 +1,7 @@
+
+// test printBool
+
+void main() {
+  printBool(true);
+  printBool(false);
+}

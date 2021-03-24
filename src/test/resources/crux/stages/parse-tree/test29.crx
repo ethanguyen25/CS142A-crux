@@ -1,0 +1,13 @@
+// test int comparison
+
+bool blt(int a, int b) {
+  return a < b;
+}
+
+void main() {
+  printBool(blt(1,2));
+  println();
+  printBool(blt(2,1));
+  println();
+  printBool(blt(1,1));
+}

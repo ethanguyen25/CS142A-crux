@@ -1,0 +1,10 @@
+Crux Program has no type errors.
+ast.DeclarationList(3)
+  ast.FunctionDefinition(3)[Symbol(myInt:func(TypeList()):int), []]
+    ast.StatementList(4)
+      ast.Return(4)
+        int: ast.Call(4)[Symbol(readInt)]
+  ast.FunctionDefinition(7)[Symbol(main:func(TypeList()):void), []]
+    ast.StatementList(8)
+      void: ast.Call(8)[Symbol(printInt)]
+        int: ast.Call(8)[Symbol(myInt)]

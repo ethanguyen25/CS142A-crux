@@ -1,0 +1,31 @@
+// test shadowing of variable
+
+int a;
+
+void shadowWithParam(int a) {
+  a = 7;
+  printInt(a);
+  println();
+}
+
+void shadowWithLocal() {
+  int a;
+  a = 9;
+  printInt(a);
+  println();
+}
+
+void main() {
+  a = 5;
+  printInt(a);
+  println();
+
+  shadowWithParam(8);
+  printInt(a);
+  println();
+
+  shadowWithLocal();
+  printInt(a);
+  println();
+}
+

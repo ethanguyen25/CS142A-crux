@@ -1,0 +1,13 @@
+// test print character
+
+void main() {
+  int i;
+  i=0;
+  loop {
+    if (i>=11) {
+      break;
+    }
+    printChar(readChar());
+    i=i+1;
+  }
+}

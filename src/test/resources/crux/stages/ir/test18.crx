@@ -1,0 +1,14 @@
+// test loop
+
+void main() {
+  int a;
+  a = 0;
+  loop {
+    if (a >= 3) {
+      break;
+    }
+    printInt(a);
+    println();
+    a = a + 1;
+  }
+}

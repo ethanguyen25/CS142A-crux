@@ -1,0 +1,7 @@
+ast.DeclarationList(4)
+  ast.FunctionDefinition(4)[Symbol(main), []]
+    ast.StatementList(5)
+      ast.Call(5)[Symbol(printBool)]
+        ast.LiteralBool(5)[TRUE]
+      ast.Call(6)[Symbol(printBool)]
+        ast.LiteralBool(6)[FALSE]

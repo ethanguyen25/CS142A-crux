@@ -1,0 +1,29 @@
+// test nested if-else and loop statements
+
+void main() {
+  int a;
+  a = 0;
+  int b;
+  b = 0;
+  loop {
+    if (a >= 3) {
+      break;
+    }
+    if (true) {
+      if (true) {
+        loop {
+	  if (b >= 3) {
+	     break;
+	  }
+          printInt(5);
+          b = b + 1;
+        }
+      } else {
+        printInt(5);
+      }
+    }
+    printInt(5);
+    a = a + 1;
+  }
+  printInt(5);
+}

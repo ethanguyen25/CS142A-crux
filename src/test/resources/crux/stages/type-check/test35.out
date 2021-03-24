@@ -1,0 +1,46 @@
+Crux Program has no type errors.
+ast.DeclarationList(3)
+  ast.FunctionDefinition(3)[Symbol(myPrintZero:func(TypeList()):void), []]
+    ast.StatementList(4)
+      void: ast.Call(4)[Symbol(printInt)]
+        int: ast.LiteralInt(4)[0]
+  ast.FunctionDefinition(7)[Symbol(myPrintOne:func(TypeList(int)):void), [Symbol(a:int)]]
+    ast.StatementList(8)
+      void: ast.Call(8)[Symbol(printInt)]
+        int: ast.Dereference(8)
+          Address(int): ast.Name(8)[a]
+  ast.FunctionDefinition(11)[Symbol(myPrintTwo:func(TypeList(int, int)):void), [Symbol(a:int), Symbol(b:int)]]
+    ast.StatementList(12)
+      void: ast.Call(12)[Symbol(printInt)]
+        int: ast.Dereference(12)
+          Address(int): ast.Name(12)[a]
+      void: ast.Call(13)[Symbol(printInt)]
+        int: ast.Dereference(13)
+          Address(int): ast.Name(13)[b]
+  ast.FunctionDefinition(16)[Symbol(myPrintThree:func(TypeList(int, int, int)):void), [Symbol(a:int), Symbol(b:int), Symbol(c:int)]]
+    ast.StatementList(17)
+      void: ast.Call(17)[Symbol(printInt)]
+        int: ast.Dereference(17)
+          Address(int): ast.Name(17)[a]
+      void: ast.Call(18)[Symbol(printInt)]
+        int: ast.Dereference(18)
+          Address(int): ast.Name(18)[b]
+      void: ast.Call(19)[Symbol(printInt)]
+        int: ast.Dereference(19)
+          Address(int): ast.Name(19)[c]
+  ast.FunctionDefinition(22)[Symbol(main:func(TypeList()):void), []]
+    ast.StatementList(23)
+      void: ast.Call(23)[Symbol(myPrintZero)]
+      void: ast.Call(24)[Symbol(println)]
+      void: ast.Call(25)[Symbol(myPrintOne)]
+        int: ast.LiteralInt(25)[1]
+      void: ast.Call(26)[Symbol(println)]
+      void: ast.Call(27)[Symbol(myPrintTwo)]
+        int: ast.LiteralInt(27)[1]
+        int: ast.LiteralInt(27)[2]
+      void: ast.Call(28)[Symbol(println)]
+      void: ast.Call(29)[Symbol(myPrintThree)]
+        int: ast.LiteralInt(29)[1]
+        int: ast.LiteralInt(29)[2]
+        int: ast.LiteralInt(29)[3]
+      void: ast.Call(30)[Symbol(println)]

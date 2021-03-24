@@ -1,0 +1,12 @@
+
+// test division 
+
+
+void main() {
+   int five;
+   int sum;
+   five = 100-600;
+   sum = five / 100;
+   printInt(sum);
+   println();
+}

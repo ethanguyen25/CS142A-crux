@@ -1,0 +1,11 @@
+Crux Program has no type errors.
+ast.DeclarationList(3)
+  ast.FunctionDefinition(3)[Symbol(main:func(TypeList()):void), []]
+    ast.StatementList(4)
+      ast.VariableDeclaration(4)[Symbol(a:int)]
+      void: ast.Assignment(5)
+        Address(int): ast.Name(5)[a]
+        int: ast.LiteralInt(5)[42]
+      void: ast.Call(6)[Symbol(printInt)]
+        int: ast.Dereference(6)
+          Address(int): ast.Name(6)[a]

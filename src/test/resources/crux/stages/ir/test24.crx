@@ -1,0 +1,13 @@
+// test using array cell as index in assignment
+
+int a[3];
+int b[10];
+  
+void main() {
+
+  b[5] = 2;
+  a[b[5]] = 100;
+
+  printInt(a[2]);
+}
+

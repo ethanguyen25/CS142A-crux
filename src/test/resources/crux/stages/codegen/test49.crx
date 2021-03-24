@@ -1,0 +1,52 @@
+// bubblesort
+int a[14];
+
+void bubblesort() {
+  bool swapped;
+  swapped = true;
+  loop {
+    if (!swapped) {
+      break;
+    }
+    swapped = false;
+    int i;
+    i = 0;
+    loop {
+      if (i >= 13) {
+        break;
+      }
+      if (a[i] > a[i+1]) {
+        int tmp;
+	tmp = a[i];
+	a[i] = a[i+1];
+	a[i+1] = tmp;
+        swapped = true;
+      }
+      i = i + 1;
+    }
+  }
+}
+
+void main() {
+  int i;
+  i = 0;
+  loop {
+    if (i >= 14) {
+      break;
+    }
+    a[i] = 14-i;
+    i = i + 1;
+  }
+
+  bubblesort();
+
+  i = 0;
+  loop {
+    if (i >= 14) {
+      break;
+    }
+    printInt(a[i]);
+    println();
+    i = i + 1;
+  }
+}

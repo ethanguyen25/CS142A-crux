@@ -1,0 +1,21 @@
+// test functions with value must have return
+
+int validReturn1(int a) {
+  if (true) {
+    if (false) {
+      a = 3;
+    } else {
+      loop {
+        return a;
+      }
+    }
+    return 4;
+  } else {
+    return a;
+  }
+}
+
+void main() {
+  printInt(3);
+  printInt(validReturn1(6));
+}

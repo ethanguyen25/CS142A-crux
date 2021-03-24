@@ -1,0 +1,52 @@
+Crux Program has no type errors.
+ast.DeclarationList(3)
+  ast.FunctionDefinition(3)[Symbol(main:func(TypeList()):void), []]
+    ast.StatementList(4)
+      ast.VariableDeclaration(4)[Symbol(i:int)]
+      void: ast.Assignment(5)
+        Address(int): ast.Name(5)[i]
+        int: ast.LiteralInt(5)[0]
+      ast.VariableDeclaration(6)[Symbol(a:int)]
+      ast.VariableDeclaration(7)[Symbol(b:int)]
+      void: ast.Assignment(8)
+        Address(int): ast.Name(8)[a]
+        int: ast.LiteralInt(8)[0]
+      void: ast.Assignment(9)
+        Address(int): ast.Name(9)[b]
+        int: ast.LiteralInt(9)[1]
+      ast.Loop(10)
+        ast.StatementList(11)
+          ast.IfElseBranch(11)
+            bool: ast.OpExpr(11)[GE]
+              int: ast.Dereference(11)
+                Address(int): ast.Name(11)[i]
+              int: ast.LiteralInt(11)[10]
+            ast.StatementList(12)
+              ast.Break(12)
+            ast.StatementList(11)
+          void: ast.Call(14)[Symbol(printInt)]
+            int: ast.Dereference(14)
+              Address(int): ast.Name(14)[b]
+          void: ast.Call(15)[Symbol(println)]
+          ast.VariableDeclaration(16)[Symbol(c:int)]
+          void: ast.Assignment(17)
+            Address(int): ast.Name(17)[c]
+            int: ast.OpExpr(17)[ADD]
+              int: ast.Dereference(17)
+                Address(int): ast.Name(17)[a]
+              int: ast.Dereference(17)
+                Address(int): ast.Name(17)[b]
+          void: ast.Assignment(18)
+            Address(int): ast.Name(18)[a]
+            int: ast.Dereference(18)
+              Address(int): ast.Name(18)[b]
+          void: ast.Assignment(19)
+            Address(int): ast.Name(19)[b]
+            int: ast.Dereference(19)
+              Address(int): ast.Name(19)[c]
+          void: ast.Assignment(20)
+            Address(int): ast.Name(20)[i]
+            int: ast.OpExpr(20)[ADD]
+              int: ast.Dereference(20)
+                Address(int): ast.Name(20)[i]
+              int: ast.LiteralInt(20)[1]

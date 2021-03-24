@@ -1,0 +1,8 @@
+// test if-else: false condition, missing else branch
+
+void main() {
+  if (false) {
+    printInt(1);
+  }
+  printInt(0-1);
+}

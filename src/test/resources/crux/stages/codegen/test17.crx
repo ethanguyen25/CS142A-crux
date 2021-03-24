@@ -1,0 +1,19 @@
+// scoped usage
+int a;
+
+void main() {
+  a = 20;
+  loop {
+    if (a > 10) {
+      if (a < 5) {
+      break;
+    }
+      a = a / (0 - 2);
+      continue;
+    }
+    a = a - 4;
+    if(a < 5) {
+      break;
+    }
+  }
+}

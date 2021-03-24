@@ -1,0 +1,42 @@
+Crux Program has no type errors.
+ast.DeclarationList(3)
+  ast.VariableDeclaration(3)[Symbol(a:int)]
+  ast.FunctionDefinition(5)[Symbol(shadowWithParam:func(TypeList(int)):void), [Symbol(a:int)]]
+    ast.StatementList(6)
+      void: ast.Assignment(6)
+        Address(int): ast.Name(6)[a]
+        int: ast.LiteralInt(6)[7]
+      void: ast.Call(7)[Symbol(printInt)]
+        int: ast.Dereference(7)
+          Address(int): ast.Name(7)[a]
+      void: ast.Call(8)[Symbol(println)]
+  ast.FunctionDefinition(11)[Symbol(shadowWithLocal:func(TypeList()):void), []]
+    ast.StatementList(12)
+      ast.VariableDeclaration(12)[Symbol(a:int)]
+      void: ast.Assignment(13)
+        Address(int): ast.Name(13)[a]
+        int: ast.LiteralInt(13)[9]
+      void: ast.Call(14)[Symbol(printInt)]
+        int: ast.Dereference(14)
+          Address(int): ast.Name(14)[a]
+      void: ast.Call(15)[Symbol(println)]
+  ast.FunctionDefinition(18)[Symbol(main:func(TypeList()):void), []]
+    ast.StatementList(19)
+      void: ast.Assignment(19)
+        Address(int): ast.Name(19)[a]
+        int: ast.LiteralInt(19)[5]
+      void: ast.Call(20)[Symbol(printInt)]
+        int: ast.Dereference(20)
+          Address(int): ast.Name(20)[a]
+      void: ast.Call(21)[Symbol(println)]
+      void: ast.Call(23)[Symbol(shadowWithParam)]
+        int: ast.LiteralInt(23)[8]
+      void: ast.Call(24)[Symbol(printInt)]
+        int: ast.Dereference(24)
+          Address(int): ast.Name(24)[a]
+      void: ast.Call(25)[Symbol(println)]
+      void: ast.Call(27)[Symbol(shadowWithLocal)]
+      void: ast.Call(28)[Symbol(printInt)]
+        int: ast.Dereference(28)
+          Address(int): ast.Name(28)[a]
+      void: ast.Call(29)[Symbol(println)]

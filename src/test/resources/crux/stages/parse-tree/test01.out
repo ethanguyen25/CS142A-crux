@@ -1,0 +1,8 @@
+program
+  declarationList
+    declaration
+      functionDefinition
+        type
+        parameterList
+        statementBlock
+          statementList

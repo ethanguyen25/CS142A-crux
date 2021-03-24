@@ -1,0 +1,13 @@
+// test using expression as index in assignment
+
+int a[3];
+int b[10];
+  
+void main() {
+
+   b[5] = 2;
+   a[1+1] = 100;
+
+  printInt(a[2]);
+}
+

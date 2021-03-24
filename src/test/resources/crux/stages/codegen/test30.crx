@@ -1,0 +1,17 @@
+// test global array access
+int canary_begin;
+int x[3];
+int canary_end;
+
+void main() {
+  canary_begin = 0;
+  canary_end = 0;
+  x[0] = 222;
+  x[1] = 333;
+  x[2] = 444;
+  printInt(canary_begin);
+  printInt(x[0]);
+  printInt(x[1]);
+  printInt(x[2]);
+  printInt(canary_end);
+}

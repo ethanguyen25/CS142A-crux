@@ -1,0 +1,13 @@
+// test recusion
+
+void rec(int a) {
+  if (a > 0) {
+    rec(a-1);
+  }
+  printInt(a);
+  println();
+}
+
+void main() {
+  rec(5);
+}

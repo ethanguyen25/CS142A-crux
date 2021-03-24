@@ -1,0 +1,38 @@
+Crux Program has no type errors.
+ast.DeclarationList(2)
+  ast.FunctionDefinition(2)[Symbol(myTrue:func(TypeList()):bool), []]
+    ast.StatementList(3)
+      void: ast.Call(3)[Symbol(printInt)]
+        int: ast.LiteralInt(3)[1]
+      void: ast.Call(4)[Symbol(println)]
+      ast.Return(5)
+        bool: ast.LiteralBool(5)[TRUE]
+  ast.FunctionDefinition(8)[Symbol(myFalse:func(TypeList()):bool), []]
+    ast.StatementList(9)
+      void: ast.Call(9)[Symbol(printInt)]
+        int: ast.LiteralInt(9)[0]
+      void: ast.Call(10)[Symbol(println)]
+      ast.Return(11)
+        bool: ast.LiteralBool(11)[FALSE]
+  ast.FunctionDefinition(14)[Symbol(main:func(TypeList()):void), []]
+    ast.StatementList(15)
+      void: ast.Call(15)[Symbol(printBool)]
+        bool: ast.OpExpr(15)[LOGIC_OR]
+          bool: ast.Call(15)[Symbol(myTrue)]
+          bool: ast.Call(15)[Symbol(myTrue)]
+      void: ast.Call(16)[Symbol(println)]
+      void: ast.Call(17)[Symbol(printBool)]
+        bool: ast.OpExpr(17)[LOGIC_OR]
+          bool: ast.Call(17)[Symbol(myFalse)]
+          bool: ast.Call(17)[Symbol(myTrue)]
+      void: ast.Call(18)[Symbol(println)]
+      void: ast.Call(19)[Symbol(printBool)]
+        bool: ast.OpExpr(19)[LOGIC_OR]
+          bool: ast.Call(19)[Symbol(myTrue)]
+          bool: ast.Call(19)[Symbol(myFalse)]
+      void: ast.Call(20)[Symbol(println)]
+      void: ast.Call(21)[Symbol(printBool)]
+        bool: ast.OpExpr(21)[LOGIC_OR]
+          bool: ast.Call(21)[Symbol(myFalse)]
+          bool: ast.Call(21)[Symbol(myFalse)]
+      void: ast.Call(22)[Symbol(println)]

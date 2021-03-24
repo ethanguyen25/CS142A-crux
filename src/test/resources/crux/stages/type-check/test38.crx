@@ -1,0 +1,42 @@
+// logical tests
+
+void main() {
+  printBool((3<5) && (4>2));
+  println();
+  printBool((3<5) && (2<1) || (1<2));
+  println();
+  printBool((1+2<4) && (2>1));
+  println();
+  printBool(false && false || false);
+  println();
+  printBool(false && false || true);
+  println();
+  printBool(false && true || false);
+  println();
+  printBool(false && true || true);
+  println();
+  printBool(true && false || false);
+  println();
+  printBool(true && false || true);
+  println();
+  printBool(true && true || false);
+  println();
+  printBool(true && true || true);
+  println();
+  printBool(false || false && false);
+  println();
+  printBool(false || false && true);
+  println();
+  printBool(false || true && false);
+  println();
+  printBool(false || true && true);
+  println();
+  printBool(true || false && false);
+  println();
+  printBool(true || false && true);
+  println();
+  printBool(true || true && false);
+  println();
+  printBool(true || true && true);
+  println();
+}

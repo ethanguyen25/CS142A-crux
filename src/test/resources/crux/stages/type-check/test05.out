@@ -1,0 +1,6 @@
+Crux Program has no type errors.
+ast.DeclarationList(4)
+  ast.VariableDeclaration(4)[Symbol(global:int)]
+  ast.ArrayDeclaration(5)[Symbol(a:array[5,bool])]
+  ast.FunctionDefinition(7)[Symbol(main:func(TypeList()):void), []]
+    ast.StatementList(9)

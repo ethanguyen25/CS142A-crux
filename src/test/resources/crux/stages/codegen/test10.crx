@@ -1,0 +1,7 @@
+// test global array access
+int x[3];
+
+void main() {
+  x[1] = 42;
+  printInt(x[1]);
+}

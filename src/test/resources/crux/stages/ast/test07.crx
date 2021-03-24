@@ -1,0 +1,7 @@
+// test local variable
+
+void main() {
+  int a;
+  a = 42;
+  printInt(a);
+}

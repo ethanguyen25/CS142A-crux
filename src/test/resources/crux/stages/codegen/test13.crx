@@ -1,0 +1,9 @@
+// test returning int
+
+int myInt() {
+  return readInt();
+}
+
+void main() {
+  printInt(myInt());
+}

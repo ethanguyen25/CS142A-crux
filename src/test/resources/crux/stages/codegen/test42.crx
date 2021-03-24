@@ -1,0 +1,22 @@
+// test evaluation order
+
+int a[3];
+
+int test() {
+     a[1] = 0;
+     return 2;
+}
+
+void main() {
+  a[0] = 1;
+  a[1] = 2;
+  a[2] = 3;
+  a[a[1]] = a[1] + test();
+  printInt(a[0]);
+  println();
+  printInt(a[1]);
+  println();
+  printInt(a[2]);
+  println();
+}
+

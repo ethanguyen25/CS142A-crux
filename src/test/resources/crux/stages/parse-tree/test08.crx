@@ -1,0 +1,9 @@
+// test multiple functions
+
+void foo() {
+  printInt(5);
+}
+
+void main() {
+  foo();
+}

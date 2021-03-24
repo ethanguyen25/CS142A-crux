@@ -1,0 +1,7 @@
+ast.DeclarationList(3)
+  ast.FunctionDefinition(3)[Symbol(main), []]
+    ast.StatementList(4)
+      ast.Call(4)[Symbol(printInt)]
+        ast.OpExpr(4)[ADD]
+          ast.LiteralInt(4)[1]
+          ast.LiteralInt(4)[1]

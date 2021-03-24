@@ -1,0 +1,17 @@
+// test statement with non-void type
+
+int myInt(int a) {
+  printInt(a);
+  return a;
+}
+
+void myPrint() {
+  myInt(7);
+  myInt(8);
+  myInt(9);
+}
+
+void main() {
+  myPrint();
+}
+  

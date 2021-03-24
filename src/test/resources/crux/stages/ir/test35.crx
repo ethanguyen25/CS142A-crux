@@ -1,0 +1,32 @@
+// test calling functions
+
+void myPrintZero() {
+  printInt(0);
+}
+
+void myPrintOne(int a) {
+  printInt(a);
+}
+
+void myPrintTwo(int a, int b) {
+  printInt(a);
+  printInt(b);
+}
+
+void myPrintThree(int a, int b, int c) {
+  printInt(a);
+  printInt(b);
+  printInt(c);
+}
+
+void main() {
+  myPrintZero();
+  println();
+  myPrintOne(1);
+  println();
+  myPrintTwo(1,2);
+  println();
+  myPrintThree(1,2,3);
+  println();
+}
+

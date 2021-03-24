@@ -1,0 +1,10 @@
+// test print character
+
+void main() {
+  printChar(72);
+  printChar(101);
+  printChar(108);
+  printChar(108);
+  printChar(111);
+  println();
+}

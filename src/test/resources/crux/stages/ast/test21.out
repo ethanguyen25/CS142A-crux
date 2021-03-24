@@ -1,0 +1,14 @@
+ast.DeclarationList(3)
+  ast.FunctionDefinition(3)[Symbol(main), []]
+    ast.StatementList(4)
+      ast.Call(4)[Symbol(printChar)]
+        ast.LiteralInt(4)[72]
+      ast.Call(5)[Symbol(printChar)]
+        ast.LiteralInt(5)[101]
+      ast.Call(6)[Symbol(printChar)]
+        ast.LiteralInt(6)[108]
+      ast.Call(7)[Symbol(printChar)]
+        ast.LiteralInt(7)[108]
+      ast.Call(8)[Symbol(printChar)]
+        ast.LiteralInt(8)[111]
+      ast.Call(9)[Symbol(println)]

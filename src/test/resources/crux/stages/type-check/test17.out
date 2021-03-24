@@ -1,0 +1,48 @@
+Crux Program has no type errors.
+ast.DeclarationList(2)
+  ast.VariableDeclaration(2)[Symbol(a:int)]
+  ast.FunctionDefinition(4)[Symbol(main:func(TypeList()):void), []]
+    ast.StatementList(5)
+      void: ast.Assignment(5)
+        Address(int): ast.Name(5)[a]
+        int: ast.LiteralInt(5)[20]
+      ast.Loop(6)
+        ast.StatementList(7)
+          ast.IfElseBranch(7)
+            bool: ast.OpExpr(7)[GT]
+              int: ast.Dereference(7)
+                Address(int): ast.Name(7)[a]
+              int: ast.LiteralInt(7)[10]
+            ast.StatementList(8)
+              ast.IfElseBranch(8)
+                bool: ast.OpExpr(8)[LT]
+                  int: ast.Dereference(8)
+                    Address(int): ast.Name(8)[a]
+                  int: ast.LiteralInt(8)[5]
+                ast.StatementList(9)
+                  ast.Break(9)
+                ast.StatementList(8)
+              void: ast.Assignment(11)
+                Address(int): ast.Name(11)[a]
+                int: ast.OpExpr(11)[DIV]
+                  int: ast.Dereference(11)
+                    Address(int): ast.Name(11)[a]
+                  int: ast.OpExpr(11)[SUB]
+                    int: ast.LiteralInt(11)[0]
+                    int: ast.LiteralInt(11)[2]
+              ast.Continue(12)
+            ast.StatementList(7)
+          void: ast.Assignment(14)
+            Address(int): ast.Name(14)[a]
+            int: ast.OpExpr(14)[SUB]
+              int: ast.Dereference(14)
+                Address(int): ast.Name(14)[a]
+              int: ast.LiteralInt(14)[4]
+          ast.IfElseBranch(15)
+            bool: ast.OpExpr(15)[LT]
+              int: ast.Dereference(15)
+                Address(int): ast.Name(15)[a]
+              int: ast.LiteralInt(15)[5]
+            ast.StatementList(16)
+              ast.Break(16)
+            ast.StatementList(15)

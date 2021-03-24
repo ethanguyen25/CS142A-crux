@@ -1,0 +1,29 @@
+// scoping test
+int a;
+
+
+void main() {
+  a = 1;
+  if (true) {
+    int a;
+    a = 2;
+    if (true) {
+      a = a * 10;
+      int a;
+      a = 3;
+      if(true) {
+        bool a;
+	a = true;
+	printBool(a);
+	println();
+      }
+      printInt(a);
+      println();
+    }
+    printInt(a);
+    println();
+  }
+  printInt(a);
+  println();
+}
+  

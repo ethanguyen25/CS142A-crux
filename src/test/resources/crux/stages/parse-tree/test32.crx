@@ -1,0 +1,23 @@
+// test logical or
+bool myTrue() {
+  printInt(1);
+  println();
+  return true;
+}
+
+bool myFalse() {
+  printInt(0);
+  println();
+  return false;
+}
+
+void main() {
+  printBool(myTrue() || myTrue());
+  println();
+  printBool(myFalse() || myTrue());
+  println();
+  printBool(myTrue() || myFalse());
+  println();
+  printBool(myFalse() || myFalse());
+  println();
+}

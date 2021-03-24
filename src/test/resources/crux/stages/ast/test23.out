@@ -1,0 +1,17 @@
+ast.DeclarationList(3)
+  ast.VariableDeclaration(3)[Symbol(a)]
+  ast.VariableDeclaration(4)[Symbol(b)]
+  ast.ArrayDeclaration(5)[Symbol(c)]
+  ast.FunctionDefinition(7)[Symbol(main), []]
+    ast.StatementList(8)
+      ast.Assignment(8)
+        ast.Name(8)[a]
+        ast.LiteralInt(8)[0]
+      ast.Assignment(9)
+        ast.Name(9)[b]
+        ast.LiteralBool(9)[FALSE]
+      ast.Assignment(10)
+        ast.ArrayAccess(10)
+          ast.Name(10)[c]
+          ast.LiteralInt(10)[0]
+        ast.LiteralInt(10)[0]
