@@ -14,8 +14,22 @@ import java.util.stream.Stream;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 
 final class CompilerStageTests {
+  /**
+   * TODO: Change variable TEST_TO_RUN to run tests for other stages. For example, to run tests for
+   * all stages: private final String[] TEST_TO_RUN = {"stage1", "stage2", "stage3", "stage4",
+   * "stage5"};
+   */
+  private final String[] TEST_TO_RUN = {"stage1"};
+
+  private boolean skipStage(String stageName) {
+    return List.of(TEST_TO_RUN).stream().noneMatch(s -> s.toLowerCase().equals(stageName));
+  }
+
   @TestFactory
   Stream<DynamicTest> parseTree() throws IOException {
+    if (skipStage("stage1")) {
+      return Stream.empty();
+    }
     var tests = getTests("parse-tree");
     return tests.stream().map(test -> dynamicTest(test.in, () -> {
       var loader = getClass().getClassLoader();
@@ -39,6 +53,9 @@ final class CompilerStageTests {
 
   @TestFactory
   Stream<DynamicTest> ast() throws IOException {
+    if (skipStage("stage2")) {
+      return Stream.empty();
+    }
     var tests = getTests("ast");
     return tests.stream().map(test -> dynamicTest(test.in, () -> {
       var loader = getClass().getClassLoader();
@@ -62,6 +79,9 @@ final class CompilerStageTests {
 
   @TestFactory
   Stream<DynamicTest> typeCheck() throws IOException {
+    if (skipStage("stage3")) {
+      return Stream.empty();
+    }
     var tests = getTests("type-check");
     return tests.stream().map(test -> dynamicTest(test.in, () -> {
       var loader = getClass().getClassLoader();
@@ -84,6 +104,9 @@ final class CompilerStageTests {
 
   @TestFactory
   Stream<DynamicTest> emulateIR() throws IOException {
+    if (skipStage("stage4")) {
+      return Stream.empty();
+    }
     var tests = getTests("ir");
     return tests.stream().map(test -> dynamicTest(test.in, () -> {
       var loader = getClass().getClassLoader();
@@ -107,6 +130,9 @@ final class CompilerStageTests {
 
   @TestFactory
   Stream<DynamicTest> codegen() throws IOException {
+    if (skipStage("stage5")) {
+      return Stream.empty();
+    }
     var tests = getTests("codegen");
     Runtime runtime = Runtime.getRuntime();
 
