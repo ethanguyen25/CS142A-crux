@@ -1,3 +1,9 @@
+//CruxParser.class
+//ctx.declarationList()   will return a list of declarations
+//   then look at each declaration list one by one
+//from the programContext, envoke the visit methods on each of the declarations.
+
+
 package crux.frontend;
 
 import crux.frontend.ast.*;
@@ -51,7 +57,12 @@ public final class ParseTreeLower {
    */
 
   public DeclarationList lower(CruxParser.ProgramContext program) {
-    return null;
+    Position pos = makePosition(program);
+    List<Declaration> d = new ArrayList<>();
+    for (var delContext : program.declarationList().declaration()) {
+      d.add(delContext.accept(declarationVisitor));
+    }
+    return new DeclarationList(pos,d);
   }
 
   /**
