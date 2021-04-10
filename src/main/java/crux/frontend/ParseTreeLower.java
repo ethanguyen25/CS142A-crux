@@ -6,6 +6,7 @@
 
 package crux.frontend;
 
+import com.sun.jdi.CharType;
 import crux.frontend.ast.*;
 import crux.frontend.ast.OpExpr.Operation;
 import crux.frontend.pt.CruxBaseVisitor;
@@ -109,8 +110,16 @@ public final class ParseTreeLower {
 
       @Override public VariableDeclaration visitVariableDeclaration(CruxParser.VariableDeclarationContext ctx) {
         Position pos = makePosition(ctx);
+        String name = ctx.Identifier().getText();
 
-        return new VariableDeclaration(pos, )
+        String ctxType = ctx.type().getText();
+        Type varType = new BoolType();
+        if (ctxType.equals("int")) {
+          varType = new IntType();
+        }
+
+        Symbol symbol = symTab.add(pos, name, varType);
+        return new VariableDeclaration(pos, symbol);
       }
 
 
@@ -121,10 +130,24 @@ public final class ParseTreeLower {
      * @return an AST {@link ArrayDeclaration}
      */
 
-    /*
-     * @Override public Declaration visitArrayDeclaration(CruxParser.ArrayDeclarationContext ctx) {
-     * }
-     */
+     @Override public Declaration visitArrayDeclaration(CruxParser.ArrayDeclarationContext ctx) {
+       Position pos = makePosition(ctx);
+       String name = ctx.Identifier().getText();
+
+       String ctxType = ctx.type().getText();
+       Type varType = new BoolType();
+       if (ctxType.equals("int")) {
+         varType = new IntType();
+       } else if (ctxType.equals("char")) {
+         varType = new CharType();
+       }
+
+       Type arrayType = new ArrayType(----, varType);
+
+       Symbol symbol = symTab.add(pos, name, varType);
+       return new ArrayDeclaration(pos, symbol);
+     }
+
 
 
     /**
@@ -132,10 +155,21 @@ public final class ParseTreeLower {
      * 
      * @return an AST {@link FunctionDefinition}
      */
-    /*
-     * @Override public Declaration visitFunctionDefinition(CruxParser.FunctionDefinitionContext
-     * ctx) { }
-     */
+
+     @Override public Declaration visitFunctionDefinition(CruxParser.FunctionDefinitionContext ctx) {
+       Position pos = makePosition(ctx);
+       String name = ctx.Identifier().getText();
+       ctx.parameterList().parameter(); //List of parameter contexts
+       ctx.type(); //type of function
+
+       Symbol funcSymbol = symTab.add(pos, new FuncType());
+       symTab.enter();;
+       StatementList sList = lower(ctx.statementBlock().statementList()); //statements
+       FunctionDefinition funcNode = FunctionDefinition(pos, funcSymbol, argsList, sList);
+       symTab.exit();
+       return funcNode;
+     }
+
   }
 
   /**
