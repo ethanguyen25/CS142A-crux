@@ -58,11 +58,11 @@ public final class ParseTreeLower {
 
   public DeclarationList lower(CruxParser.ProgramContext program) {
     Position pos = makePosition(program);
-    List<Declaration> d = new ArrayList<>();
-    for (var delContext : program.declarationList().declaration()) {
-      d.add(delContext.accept(declarationVisitor));
+    List<Declaration> decList = new ArrayList<>();
+    for (var decContext : program.declarationList().declaration()) {
+      decList.add(decContext.accept(declarationVisitor));
     }
-    return new DeclarationList(pos,d);
+    return new DeclarationList(pos,decList);
   }
 
   /**
@@ -71,9 +71,15 @@ public final class ParseTreeLower {
    * @return a {@link StatementList} AST object.
    */
 
-  /*
-   * private StatementList lower(CruxParser.StatementListContext statementList) { }
-   */
+    private StatementList lower(CruxParser.StatementListContext statementList) {
+      Position pos = makePosition(statementList);
+      List<Statement> sList = new ArrayList<>();
+      for (var e : statementList.statement()) {
+        sList.add(e.accept(statementVisitor));
+      }
+      return new StatementList(pos, sList);
+    }
+
 
   /**
    * Similar to {@link #lower(CruxParser.StatementListContext)}, but handling symbol table as well.
@@ -81,9 +87,13 @@ public final class ParseTreeLower {
    * @return a {@link StatementList} AST object.
    */
 
-  /*
-   * private StatementList lower(CruxParser.StatementBlockContext statementBlock) { }
-   */
+    private StatementList lower(CruxParser.StatementBlockContext statementBlock) {
+      symTab.enter();
+      StatementList sList = lower(statementBlock.statementList());
+      symTab.exit();
+      return sList;
+    }
+
 
 
   /**
@@ -97,10 +107,12 @@ public final class ParseTreeLower {
      * @return an AST {@link VariableDeclaration}
      */
 
-    /*
-     * @Override public VariableDeclaration
-     * visitVariableDeclaration(CruxParser.VariableDeclarationContext ctx) { }
-     */
+      @Override public VariableDeclaration visitVariableDeclaration(CruxParser.VariableDeclarationContext ctx) {
+        Position pos = makePosition(ctx);
+
+        return new VariableDeclaration(pos, )
+      }
+
 
 
     /**
