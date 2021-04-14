@@ -100,3 +100,31 @@ WhiteSpaces
 Comment
  : '//' ~[\r\n]* -> skip
  ;
+
+AND : '&&';
+OR : '||';
+NOT : '!';
+IF : 'if';
+ELSE : 'else';
+LOOP : 'loop';
+CONTINUE : 'continue';
+BREAK : 'break';
+RETURN : 'return';
+OPEN_PAREN : '(';
+CLOSE_PAREN : ')';
+OPEN_BRACE : '{';
+CLOSE_BRACE : '}';
+OPEN_BRACKET : '[';
+CLOSE_BRACKET : ']';
+ADD : '+';
+SUB : '-';
+MUL : '*';
+DIV : '/';
+GREATER_EQUAL : '>=';
+LESSER_EQUAL : '<=';
+NOT_EQUAL : '!=';
+EQUAL : '==';
+GREATER_THAN: '>';
+LESS_THAN : '<';
+ASSIGN : '=';
+COMMA : ',';

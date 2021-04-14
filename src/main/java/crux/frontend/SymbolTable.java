@@ -75,7 +75,6 @@ final class SymbolTable {
     // TODO. Add a symbol to the most recent scope IF the symbol does not exist already.
     // TODO. If it does exist then it should be a declaration error.
 
-    //WHAT IS 'POS' USED FOR
 
     Map<String, Symbol> currentScope = symbolScopes.get(symbolScopes.size()-1);
     if (currentScope.get(name) == null) {
@@ -83,7 +82,7 @@ final class SymbolTable {
       currentScope.put(name, newSymbol);
       return newSymbol;
     } else {
-      err.print("DeclarationError");
+      err.printf("DeclarationError%s[Could not declare %s.]%n", pos, name);
       encounteredError = true;
       return new Symbol(name, "DeclarationError");
     }

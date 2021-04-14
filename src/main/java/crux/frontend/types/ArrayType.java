@@ -3,7 +3,7 @@ package crux.frontend.types;
 /**
  * This Type will Array data type base is the base of the array, could be int, bool, or char for
  * cruxlang This should implement the equivalent methods Two arrays are equivalent if their bases
- * are equivalent and have same extend
+ * are equivalent and have same extent
  */
 public final class ArrayType extends Type {
   private final Type base;

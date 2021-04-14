@@ -10,8 +10,8 @@ import java.util.List;
  */
 public final class OpExpr extends BaseNode implements Expression {
   public static enum Operation {
-    GE(">="), LE("<="), NE("!="), EQ("=="), GT(">"), LT("<"), ADD("+"), SUB("-"), MULT("*"), DIV(
-        "/"), LOGIC_AND("&&"), LOGIC_OR("||"), LOGIC_NOT("!");
+    GE(">="), LE("<="), NE("!="), EQ("=="), GT(">"), LT("<"), ADD("+"), SUB("-"), MULT("*"),
+    DIV("/"), LOGIC_AND("&&"), LOGIC_OR("||"), LOGIC_NOT("!");
 
     private String op;
 
