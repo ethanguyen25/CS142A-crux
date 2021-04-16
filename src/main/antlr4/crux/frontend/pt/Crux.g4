@@ -14,18 +14,59 @@ declaration
  ;
 
 variableDeclaration
- : type Identifier ';'
+ : type Identifier SemiColon
  ;
 
+OPEN_BRACKET : '[' ;
+CLOSE_BRACKET : ']';
+
+OPEN_PAREN : '(';
+CLOSE_PAREN : ')';
+
+OPEN_BRACE : '{';
+CLOSE_BRACE : '}';
+
+OR : '||';
+
+NOT : '!';
+
+IF : 'if';
+ELSE : 'else';
+LOOP : 'loop';
+
+
+CONTINUE : 'continue';
+BREAK : 'break';
+RETURN : 'return';
+
+ADD : '+';
+SUB : '-';
+MUL : '*';
+DIV : '/';
+
+GREATER_EQUAL : '>=';
+LESSER_EQUAL : '<=';
+NOT_EQUAL : '!=';
+EQUAL : '==';
+GREATER_THAN: '>';
+LESS_THAN : '<';
+
+ASSIGN : '=';
+
+COMMA : ',';
+
+
+
+
 arrayDeclaration
- : type Identifier '[' Integer ']' ';';
+ : type Identifier OPEN_BRACKET Integer CLOSE_BRACKET SemiColon;
 
 functionDefinition
- : type Identifier '(' parameterList ')' statementBlock
+ : type Identifier OPEN_PAREN parameterList CLOSE_PAREN statementBlock
  ;
 
 parameterList
- : ( parameter ( ',' parameter )* )?
+ : ( parameter ( COMMA parameter )* )?
  ;
 
 parameter
@@ -33,7 +74,7 @@ parameter
  ;
 
 statementBlock
- : '{' statementList '}'
+ : OPEN_BRACE statementList CLOSE_BRACE
  ;
 
 statementList
@@ -50,33 +91,34 @@ literal
  | False
  ;
 
-designator : Identifier ( '[' expression0 ']' )?;
+designator : Identifier ( OPEN_BRACKET expression0 CLOSE_BRACKET )?;
 
-op0 : '>=' | '<=' | '!=' | '==' | '>' | '<';
-op1 : '+' | '-' | '||';
-op2 : '*' | '/' | '&&';
+op0 : GREATER_EQUAL | LESSER_EQUAL | NOT_EQUAL | EQUAL | GREATER_THAN | LESS_THAN;
+op1 : ADD | SUB | OR;
+op2 : MUL | DIV | AND;
 
 expression0 : expression1 ( op0 expression1 )?;
 expression1 : expression2 | expression1 op1 expression2;
 expression2 : expression3 | expression2 op2 expression3;
-expression3 : '!' expression3 | '(' expression0 ')' | designator |
+expression3 : '!' expression3 | OPEN_PAREN expression0 CLOSE_PAREN | designator |
               callExpression | literal;
 
-callExpression : Identifier '(' expressionList ')';
-expressionList : ( expression0 ( ',' expression0 )* )?;
+callExpression : Identifier OPEN_PAREN expressionList CLOSE_PAREN;
+expressionList : ( expression0 ( COMMA expression0 )* )?;
 
 
-assignmentStatement : designator '=' expression0 ';';
-callStatement : callExpression ';';
-ifStatement : 'if' expression0 statementBlock ( 'else' statementBlock )?;
-loopStatement : 'loop' statementBlock;
-breakStatement : 'break' ';';
-continueStatement : 'continue' ';';
-returnStatement : 'return' expression0 ';';
+assignmentStatement : designator ASSIGN expression0 SemiColon;
+callStatement : callExpression SemiColon;
+ifStatement : IF expression0 statementBlock ( ELSE statementBlock )?;
+loopStatement : LOOP statementBlock;
+breakStatement : BREAK SemiColon;
+continueStatement : CONTINUE SemiColon;
+returnStatement : RETURN expression0 SemiColon;
 statement : variableDeclaration | callStatement | assignmentStatement |
             assignmentStatement | ifStatement | loopStatement |
             breakStatement | continueStatement | returnStatement;
 
+AND : '&&';
 
 
 SemiColon: ';';
@@ -101,30 +143,3 @@ Comment
  : '//' ~[\r\n]* -> skip
  ;
 
-AND : '&&';
-OR : '||';
-NOT : '!';
-IF : 'if';
-ELSE : 'else';
-LOOP : 'loop';
-CONTINUE : 'continue';
-BREAK : 'break';
-RETURN : 'return';
-OPEN_PAREN : '(';
-CLOSE_PAREN : ')';
-OPEN_BRACE : '{';
-CLOSE_BRACE : '}';
-OPEN_BRACKET : '[';
-CLOSE_BRACKET : ']';
-ADD : '+';
-SUB : '-';
-MUL : '*';
-DIV : '/';
-GREATER_EQUAL : '>=';
-LESSER_EQUAL : '<=';
-NOT_EQUAL : '!=';
-EQUAL : '==';
-GREATER_THAN: '>';
-LESS_THAN : '<';
-ASSIGN : '=';
-COMMA : ',';
