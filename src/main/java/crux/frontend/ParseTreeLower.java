@@ -219,6 +219,20 @@ public final class ParseTreeLower {
       @Override
       public Statement visitVariableDeclaration(CruxParser.VariableDeclarationContext ctx) {
         return declarationVisitor.visitVariableDeclaration(ctx);
+//        Position pos = makePosition(ctx);
+//        String name = ctx.Identifier().getText();
+//
+//        String typeName = ctx.type().getText();
+//        Type t;
+//        if (typeName.equals("int")) {
+//          t = new IntType();
+//        } else {
+//          t = new BoolType();
+//        }
+//
+////        Symbol sym = new Symbol(name, t);
+//        Symbol sym = symTab.add(pos, name, t);
+//        return new VariableDeclaration(pos, sym);
       }
 
 
@@ -250,17 +264,6 @@ public final class ParseTreeLower {
       @Override
       public Statement visitCallStatement(CruxParser.CallStatementContext ctx) {
         return expressionVisitor.visitCallExpression(ctx.callExpression());
-
-//       Position pos = makePosition(ctx);
-//       Symbol callee = symTab.lookup(pos, ctx.callExpression().Identifier().getText());
-//
-//       List<Expression> exprList = new ArrayList<>();
-//       for (var e : ctx.callExpression().expressionList().expression0()) {
-//         Expression expr = e.accept(expressionVisitor);
-//         exprList.add(expr);
-//       }
-
-//       return new Call(pos, callee, exprList);
       }
 
 
@@ -277,16 +280,10 @@ public final class ParseTreeLower {
         Position pos = makePosition(ctx);
         Expression ifCond = ctx.expression0().accept(expressionVisitor);
 
-        if (ctx.statementBlock().size() == 1) {
-          StatementList thenBlock = lower(ctx.statementBlock(0).statementList());
-          List<Statement> ls = new ArrayList<>();
-          StatementList elseBlock = new StatementList(pos, ls);
-          return new IfElseBranch(pos, ifCond, thenBlock, elseBlock);
-        } else {
-          StatementList thenBlock = lower(ctx.statementBlock(0).statementList());
-          StatementList elseBlock = lower(ctx.statementBlock( 1).statementList());
-          return new IfElseBranch(pos, ifCond, thenBlock, elseBlock);
-        }
+        StatementList thenBlock = lower(ctx.statementBlock(0));
+        StatementList elseBlock = (ctx.ELSE() != null) ? lower(ctx.statementBlock(1)) : new StatementList(pos, List.of());
+        return new IfElseBranch(pos, ifCond, thenBlock, elseBlock);
+
       }
 
 
@@ -302,11 +299,6 @@ public final class ParseTreeLower {
       public Statement visitLoopStatement(CruxParser.LoopStatementContext ctx) {
         Position pos = makePosition(ctx);
 
-//       List<Statement> lStatement = new ArrayList<>();
-//       for (var e: ctx.statementBlock().statementList().statement()) {
-//         lStatement.add(e.accept(statementVisitor));
-//       }
-//       StatementList sList = new StatementList(pos, lStatement);
         StatementList sList = lower(ctx.statementBlock());
 
         return new Loop(pos, sList);
@@ -465,7 +457,12 @@ public final class ParseTreeLower {
           return ctx.callExpression().accept(expressionVisitor);
         } else if (ctx.expression0() != null) {
           return ctx.expression0().accept(expressionVisitor);
-        } else {
+        } else if (ctx.NOT() != null) {
+          Position pos = makePosition(ctx);
+          OpExpr.Operation operation = OpExpr.Operation.LOGIC_NOT;
+          Expression expr = ctx.expression3().accept(expressionVisitor);
+          return new OpExpr(pos, operation, expr, null);
+        }else {
           return ctx.expression3().accept(expressionVisitor);
         }
       }
