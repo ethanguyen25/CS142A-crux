@@ -94,7 +94,6 @@ public final class ParseTreeLower {
     }
 
 
-
   /**
    * A parse tree visitor to create AST nodes derived from {@link Declaration}
    */
@@ -120,7 +119,6 @@ public final class ParseTreeLower {
       Symbol symbol = symTab.add(pos, name, varType);
       return new VariableDeclaration(pos, symbol);
     }
-
 
     /**
      * Visit a parse tree array declaration and create an AST {@link ArrayDeclaration}
@@ -168,10 +166,18 @@ public final class ParseTreeLower {
         retType = new VoidType();
       }
 
+      TypeList tList = TypeList.of();
+      for (var e : ctx.parameterList().parameter()) {
+        if (e.type().getText().equals("int")) {
+          tList.append(new IntType());
+        } else if (e.type().getText().equals("bool")) {
+          tList.append(new BoolType());
+        }
+      }
+      Symbol funcSymbol = symTab.add(pos, ctx.Identifier().getText(), new FuncType(tList, retType));
       symTab.enter();
 
       //TypeList for FuncType()  and  List for FunctionDefinitionNode
-      TypeList tList = TypeList.of();
       List<Symbol> symList = new ArrayList<>();
       for (var e : ctx.parameterList().parameter()) {
         if (e.type().getText().equals("int")) {
@@ -185,14 +191,12 @@ public final class ParseTreeLower {
         }
       }
 
-      Symbol funcSymbol = new Symbol(ctx.Identifier().getText(), new FuncType(tList, retType));
-
       StatementList funcBody = lower(ctx.statementBlock());
 
       FunctionDefinition funcDef = new FunctionDefinition(pos, funcSymbol, symList, funcBody);
 
       symTab.exit();
-      return funcDef; //(Position position, Symbol symbol, List<Symbol> parameters, StatementList statements)
+      return funcDef;
     }
   }
 
@@ -273,22 +277,16 @@ public final class ParseTreeLower {
         Position pos = makePosition(ctx);
         Expression ifCond = ctx.expression0().accept(expressionVisitor);
 
-//       List<Statement> first = new ArrayList<>();
-//       for (var e: ctx.statementBlock(0).statementList().statement()) {
-//         first.add(e.accept(statementVisitor));
-//       }
-//       StatementList thenBlock = new StatementList(pos, first);
-        StatementList thenBlock = lower(ctx.statementBlock(0).statementList());
-
-
-//       List<Statement> second = new ArrayList<>();
-//       for (var e: ctx.statementBlock(1).statementList().statement()) {
-//         second.add(e.accept(statementVisitor));
-//       }
-//       StatementList elseBlock = new StatementList(pos, second);
-        StatementList elseBlock = lower(ctx.statementBlock( 1).statementList());
-
-        return new IfElseBranch(pos, ifCond, thenBlock, elseBlock);
+        if (ctx.statementBlock().size() == 1) {
+          StatementList thenBlock = lower(ctx.statementBlock(0).statementList());
+          List<Statement> ls = new ArrayList<>();
+          StatementList elseBlock = new StatementList(pos, ls);
+          return new IfElseBranch(pos, ifCond, thenBlock, elseBlock);
+        } else {
+          StatementList thenBlock = lower(ctx.statementBlock(0).statementList());
+          StatementList elseBlock = lower(ctx.statementBlock( 1).statementList());
+          return new IfElseBranch(pos, ifCond, thenBlock, elseBlock);
+        }
       }
 
 
@@ -330,7 +328,6 @@ public final class ParseTreeLower {
 
         return new Return(pos, expr);
       }
-
 
       /**
        * Creates a Break node
@@ -518,7 +515,7 @@ public final class ParseTreeLower {
 
           ArrayAccess aa = new ArrayAccess(pos, n, expr0);
           if (dereferenceDesignator) {
-            return new Dereference(pos, aa); //aa
+            return new Dereference(pos, aa);
           } else {
             return aa;
           }

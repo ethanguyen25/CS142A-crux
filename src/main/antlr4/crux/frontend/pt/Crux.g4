@@ -100,7 +100,7 @@ op2 : MUL | DIV | AND;
 expression0 : expression1 ( op0 expression1 )?;
 expression1 : expression2 | expression1 op1 expression2;
 expression2 : expression3 | expression2 op2 expression3;
-expression3 : '!' expression3 | OPEN_PAREN expression0 CLOSE_PAREN | designator |
+expression3 : NOT expression3 | OPEN_PAREN expression0 CLOSE_PAREN | designator |
               callExpression | literal;
 
 callExpression : Identifier OPEN_PAREN expressionList CLOSE_PAREN;
