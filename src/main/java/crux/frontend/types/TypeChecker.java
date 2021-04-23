@@ -70,16 +70,25 @@ public final class TypeChecker {
 
     @Override
     public Void visit(Name name) {
+      Type t = name.getSymbol().getType();
+      setNodeType(name, new AddressType(t));
       return null;
     }
 
     @Override
     public Void visit(ArrayDeclaration arrayDeclaration) {
+      //if (arrayDeclaration.getSymbol().getType() == new IntType())
       return null;
     }
 
     @Override
     public Void visit(Assignment assignment) {
+      assignment.getLocation().accept(this);
+      Type locationType = getType(assignment.getLocation());
+      assignment.getValue().accept(this);
+      Type valueType = getType(assignment.getValue());
+
+      setNodeType(assignment, locationType.assign(valueType));
       return null;
     }
 
@@ -90,6 +99,13 @@ public final class TypeChecker {
 
     @Override
     public Void visit(Call call) {
+      TypeList tList = TypeList.of();
+      for (var e: call.getArguments()){
+        e.accept(this);
+        tList.append(getType(e));
+      }
+      Type t = call.getCallee().getType().call(tList);
+      setNodeType(call, t);
       return null;
     }
 
@@ -100,6 +116,9 @@ public final class TypeChecker {
 
     @Override
     public Void visit(DeclarationList declarationList) {
+      for (var e: declarationList.getChildren()){
+        e.accept(this);
+      }
       return null;
     }
 
@@ -110,6 +129,26 @@ public final class TypeChecker {
 
     @Override
     public Void visit(FunctionDefinition functionDefinition) {
+      if (functionDefinition.getSymbol().getName() == "main") {
+        Type retType = ((FuncType)functionDefinition.getSymbol().getType()).getRet();
+        if ( retType.getClass() != VoidType.class){
+          addTypeError(functionDefinition, "FunctionDefinitionError");
+        } else {
+          setNodeType(functionDefinition, new VoidType());
+        }
+      }
+
+      TypeList tl = ((FuncType) functionDefinition.getSymbol().getType()).getArgs();
+      for (var e: tl){
+        if (!(e.getClass() == IntType.class || e.getClass() == BoolType.class)){
+          addTypeError(functionDefinition, "FunctionDefinitionError");
+        }
+      }
+
+      for (var e: functionDefinition.getStatements().getChildren()){
+        e.accept(this);
+      }
+
       return null;
     }
 
@@ -125,11 +164,13 @@ public final class TypeChecker {
 
     @Override
     public Void visit(LiteralBool literalBool) {
+      setNodeType(literalBool, new BoolType());
       return null;
     }
 
     @Override
     public Void visit(LiteralInt literalInt) {
+      setNodeType(literalInt, new IntType());
       return null;
     }
 
@@ -140,6 +181,46 @@ public final class TypeChecker {
 
     @Override
     public Void visit(OpExpr op) {
+      op.getLeft().accept(this);
+      if (op.getRight() != null){
+        op.getRight().accept(this);
+      }
+      Type leftType = getType(op.getLeft());
+      Type rightType = getType(op.getRight());
+
+      switch (op.getOp()){
+        case ADD:
+          var a = leftType.add(rightType);
+          setNodeType(op, a);
+        case SUB:
+          var s = leftType.sub(rightType);
+          setNodeType(op, s);
+        case MULT:
+          var m = leftType.mul(rightType);
+          setNodeType(op, m);
+        case DIV:
+          var d = leftType.div(rightType);
+          setNodeType(op, d);
+        case GE:
+        case LE:
+        case NE:
+        case EQ:
+        case GT:
+        case LT:
+          var many = leftType.compare(rightType);
+          setNodeType(op, many);
+        case LOGIC_AND:
+          var la = leftType.and(rightType);
+          setNodeType(op, la);
+        case LOGIC_OR:
+          var lo = leftType.or(rightType);
+          setNodeType(op, lo);
+        case LOGIC_NOT:
+          var ln = leftType.not();
+          setNodeType(op, ln);
+        default:
+          addTypeError(op, "OpExprError");
+      }
       return null;
     }
 

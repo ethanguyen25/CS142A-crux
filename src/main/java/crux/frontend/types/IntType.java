@@ -9,4 +9,49 @@ public final class IntType extends Type {
   public String toString() {
     return "int";
   }
+
+
+
+  @Override
+  public Type add(Type other) {
+    if (equivalent(other)){
+      return new IntType();
+    }
+    return super.add(other);
+  }
+
+  @Override
+  public Type sub(Type other){
+    if (equivalent(other)){
+      return new IntType();
+    }
+    return super.sub(other);
+  }
+
+  @Override
+  public Type mul(Type other){
+    if (equivalent(other)){
+      return new IntType();
+    }
+    return super.mul(other);
+  }
+
+  @Override
+  public Type div(Type other){
+    if (equivalent(other)){
+      return new IntType();
+    }
+    return super.div(other);
+  }
+
+  @Override
+  public boolean equivalent(Type other) {
+    if (other.toString().equals("int")) {
+      return true;
+    }
+    return false;
+  }
+
+
 }
+

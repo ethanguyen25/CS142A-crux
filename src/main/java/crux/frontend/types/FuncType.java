@@ -26,4 +26,28 @@ public final class FuncType extends Type {
   public String toString() {
     return "func(" + args + "):" + ret;
   }
+
+
+  @Override
+  public Type call(Type arguments){
+    if (equivalent(arguments)){
+      return this.ret;
+    }
+    return super.call(arguments);
+  }
+
+  @Override
+  public boolean equivalent(Type other){
+    if (other.getClass() == FuncType.class){
+      if (this.getRet().equivalent(((FuncType) other).getRet())){
+        if (this.getArgs().equivalent(((FuncType) other).getArgs())){
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+
+
 }

@@ -30,4 +30,34 @@ public final class AddressType extends Type {
   public String toString() {
     return "Address(" + base + ")";
   }
+
+  @Override
+  public Type deref(){ //bool, int, array
+    if (equivalent(this)){
+      return base;
+    } else if (this != (BoolType.class || IntType.class || ArrayType.class)){
+      return super.deref();
+    }
+    return super.deref();
+  }
+
+  @Override
+  public Type index(Type other){
+    if (equivalent(other)){
+      return new AddressType(base);
+    }
+    return super.index(other);
+  }
+
+  @Override
+  public Type assign(Type other){
+    if (equivalent(other)){
+      return new AddressType(base);
+    }
+    return super.assign(other);
+  }
+
+
 }
+
+

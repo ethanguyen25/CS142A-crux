@@ -14,4 +14,34 @@ public final class BoolType extends Type {
   public String toString() {
     return "bool";
   }
+
+
+  @Override
+  public Type and(Type other){
+    if (equivalent(other)){
+      return new BoolType();
+    }
+    return super.and(other);
+  }
+
+  @Override
+  public Type or(Type other){
+    if (equivalent(other)){
+      return new BoolType();
+    }
+    return super.or(other);
+  }
+
+  @Override
+  public Type not(){
+    return new BoolType();
+  }
+
+  @Override
+  public Type compare(Type other){
+    if (equivalent(other)){
+      return new BoolType();
+    }
+    return super.compare(other);
+  }
 }

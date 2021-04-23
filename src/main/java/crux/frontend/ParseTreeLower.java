@@ -10,7 +10,6 @@ import crux.frontend.ast.*;
 import crux.frontend.pt.CruxBaseVisitor;
 import crux.frontend.pt.CruxParser;
 import crux.frontend.types.*;
-import crux.midend.ir.core.insts.BinaryOperator;
 import org.antlr.v4.runtime.ParserRuleContext;
 
 import java.io.PrintStream;
@@ -219,20 +218,6 @@ public final class ParseTreeLower {
       @Override
       public Statement visitVariableDeclaration(CruxParser.VariableDeclarationContext ctx) {
         return declarationVisitor.visitVariableDeclaration(ctx);
-//        Position pos = makePosition(ctx);
-//        String name = ctx.Identifier().getText();
-//
-//        String typeName = ctx.type().getText();
-//        Type t;
-//        if (typeName.equals("int")) {
-//          t = new IntType();
-//        } else {
-//          t = new BoolType();
-//        }
-//
-////        Symbol sym = new Symbol(name, t);
-//        Symbol sym = symTab.add(pos, name, t);
-//        return new VariableDeclaration(pos, sym);
       }
 
 
