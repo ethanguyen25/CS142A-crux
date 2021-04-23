@@ -94,6 +94,7 @@ public final class TypeChecker {
 
     @Override
     public Void visit(Break brk) {
+      brk.accept(this);
       return null;
     }
 
@@ -111,6 +112,7 @@ public final class TypeChecker {
 
     @Override
     public Void visit(Continue cont) {
+      cont.accept(this);
       return null;
     }
 
@@ -124,6 +126,9 @@ public final class TypeChecker {
 
     @Override
     public Void visit(Dereference dereference) {
+      dereference.getAddress().accept(this);
+      Type t = getType(dereference.getAddress()).deref();
+      setNodeType(dereference, t);
       return null;
     }
 
@@ -154,11 +159,28 @@ public final class TypeChecker {
 
     @Override
     public Void visit(IfElseBranch ifElseBranch) {
+      if (getType(ifElseBranch.getCondition()).getClass() != BoolType.class){
+        addTypeError(ifElseBranch, "ifElseBranchError");
+      }
+
+      for (var e: ifElseBranch.getThenBlock().getChildren()){
+        e.accept(this);
+      }
+      for (var e: ifElseBranch.getElseBlock().getChildren()){
+        e.accept(this);
+      }
       return null;
     }
 
     @Override
     public Void visit(ArrayAccess access) {
+      access.getBase().accept(this);
+      access.getOffset().accept(this);
+      Type bType = getType(access.getBase());
+      Type oType = getType(access.getOffset());
+      Type t = bType.index(oType);
+      setNodeType(access, t);
+
       return null;
     }
 
@@ -175,7 +197,11 @@ public final class TypeChecker {
     }
 
     @Override
-    public Void visit(Loop loop) {
+    public Void visit(Loop loop) { //Do
+      for (var e: loop.getBody().getChildren()){
+        e.accept(this);
+        hasBreak
+      }
       return null;
     }
 
@@ -201,14 +227,6 @@ public final class TypeChecker {
         case DIV:
           var d = leftType.div(rightType);
           setNodeType(op, d);
-        case GE:
-        case LE:
-        case NE:
-        case EQ:
-        case GT:
-        case LT:
-          var many = leftType.compare(rightType);
-          setNodeType(op, many);
         case LOGIC_AND:
           var la = leftType.and(rightType);
           setNodeType(op, la);
@@ -218,6 +236,14 @@ public final class TypeChecker {
         case LOGIC_NOT:
           var ln = leftType.not();
           setNodeType(op, ln);
+        case GE:
+        case LE:
+        case NE:
+        case EQ:
+        case GT:
+        case LT:
+          var many = leftType.compare(rightType);
+          setNodeType(op, many);
         default:
           addTypeError(op, "OpExprError");
       }
@@ -226,16 +252,30 @@ public final class TypeChecker {
 
     @Override
     public Void visit(Return ret) {
+      ret.getValue().accept(this);
+      Type rtype = getType(ret.getValue());
+      if (rtype != currentFunctionReturnType){
+        addTypeError(ret, "returnError");
+      }
       return null;
     }
 
     @Override
-    public Void visit(StatementList statementList) {
+    public Void visit(StatementList statementList) { //DO
+      for (var e: statementList.getChildren()) {
+        e.accept(this);
+      }
       return null;
     }
 
     @Override
     public Void visit(VariableDeclaration variableDeclaration) {
+      //variableDeclaration.accept(this);
+      //Type t = getType(variableDeclaration);
+      Type t = variableDeclaration.getSymbol().getType();
+      if (!(t.getClass() == IntType.class || t.getClass() == BoolType.class)){
+        addTypeError(variableDeclaration, "variableDeclarationError");
+      }
       return null;
     }
   }

@@ -35,7 +35,11 @@ public final class AddressType extends Type {
   public Type deref(){ //bool, int, array
     if (equivalent(this)){
       return base;
-    } else if (this != (BoolType.class || IntType.class || ArrayType.class)){
+    } else if (base.getClass() != BoolType.class) {
+     return super.deref();
+    } else if (base.getClass() != IntType.class){
+      return super.deref();
+    } else if (base.getClass() != ArrayType.class){
       return super.deref();
     }
     return super.deref();
