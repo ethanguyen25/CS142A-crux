@@ -1,7 +1,7 @@
 package crux.frontend.types;
 
 /**
- * This Type will Array data type base is the base of the array, could be int, bool, or char for
+ * This Type will Array data type base is the base of the array, could be int or bool for
  * cruxlang This should implement the equivalent methods Two arrays are equivalent if their bases
  * are equivalent and have same extent
  */
@@ -26,4 +26,13 @@ public final class ArrayType extends Type {
   public String toString() {
     return String.format("array[%d,%s]", extent, base);
   }
+
+  @Override
+  public boolean equivalent(Type that) {   //MIGHT BE WRONG LOOK HERE
+    if (base.equivalent(that)) {
+      return true;
+    }
+    return false;
+  }
+
 }

@@ -30,10 +30,15 @@ public final class FuncType extends Type {
 
   @Override
   public Type call(Type arguments){
-    if (equivalent(arguments)){
+    if (arguments.equivalent(args)){
       return this.ret;
     }
     return super.call(arguments);
+
+    /*if (equivalent(arguments)){
+      return this.ret;
+    }
+    return super.call(arguments);*/
   }
 
   @Override

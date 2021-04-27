@@ -77,7 +77,11 @@ public final class TypeChecker {
 
     @Override
     public Void visit(ArrayDeclaration arrayDeclaration) {
-      //if (arrayDeclaration.getSymbol().getType() == new IntType())
+      /*if (arrayDeclaration.getSymbol().getType().getClass() != IntType.class) {
+        addTypeError(arrayDeclaration, "arrayDeclarationError");
+      } else if (arrayDeclaration.getSymbol().getType().getClass() != BoolType.class) {
+        addTypeError(arrayDeclaration, "arrayDeclarationError");
+      }*/
       return null;
     }
 
@@ -94,7 +98,8 @@ public final class TypeChecker {
 
     @Override
     public Void visit(Break brk) {
-      brk.accept(this);
+      //brk.accept(this);
+      lastStatementReturns = false;
       return null;
     }
 
@@ -107,12 +112,14 @@ public final class TypeChecker {
       }
       Type t = call.getCallee().getType().call(tList);
       setNodeType(call, t);
+
       return null;
     }
 
     @Override
     public Void visit(Continue cont) {
-      cont.accept(this);
+      //cont.accept(this);
+      lastStatementReturns = false;
       return null;
     }
 
@@ -134,13 +141,16 @@ public final class TypeChecker {
 
     @Override
     public Void visit(FunctionDefinition functionDefinition) {
-      if (functionDefinition.getSymbol().getName() == "main") {
+      if (functionDefinition.getSymbol().getName().equals("main")) {
         Type retType = ((FuncType)functionDefinition.getSymbol().getType()).getRet();
-        if ( retType.getClass() != VoidType.class){
+        if (retType.getClass() != VoidType.class){
           addTypeError(functionDefinition, "FunctionDefinitionError");
-        } else {
+        } /*else {
           setNodeType(functionDefinition, new VoidType());
-        }
+        }*/
+      } else {
+        currentFunctionSymbol = functionDefinition.getSymbol();
+        currentFunctionReturnType = ((FuncType)functionDefinition.getSymbol().getType()).getRet();
       }
 
       TypeList tl = ((FuncType) functionDefinition.getSymbol().getType()).getArgs();
@@ -178,7 +188,9 @@ public final class TypeChecker {
       access.getOffset().accept(this);
       Type bType = getType(access.getBase());
       Type oType = getType(access.getOffset());
+      //Type t = oType.index(bType);
       Type t = bType.index(oType);
+
       setNodeType(access, t);
 
       return null;
@@ -200,7 +212,7 @@ public final class TypeChecker {
     public Void visit(Loop loop) { //Do
       for (var e: loop.getBody().getChildren()){
         e.accept(this);
-        hasBreak
+        //hasBreak
       }
       return null;
     }
@@ -218,24 +230,31 @@ public final class TypeChecker {
         case ADD:
           var a = leftType.add(rightType);
           setNodeType(op, a);
+          break;
         case SUB:
           var s = leftType.sub(rightType);
           setNodeType(op, s);
+          break;
         case MULT:
           var m = leftType.mul(rightType);
           setNodeType(op, m);
+          break;
         case DIV:
           var d = leftType.div(rightType);
           setNodeType(op, d);
+          break;
         case LOGIC_AND:
           var la = leftType.and(rightType);
           setNodeType(op, la);
+          break;
         case LOGIC_OR:
           var lo = leftType.or(rightType);
           setNodeType(op, lo);
+          break;
         case LOGIC_NOT:
           var ln = leftType.not();
           setNodeType(op, ln);
+          break;
         case GE:
         case LE:
         case NE:
@@ -244,8 +263,10 @@ public final class TypeChecker {
         case LT:
           var many = leftType.compare(rightType);
           setNodeType(op, many);
+          break;
         default:
           addTypeError(op, "OpExprError");
+          break;
       }
       return null;
     }
@@ -261,9 +282,18 @@ public final class TypeChecker {
     }
 
     @Override
-    public Void visit(StatementList statementList) { //DO
+    public Void visit(StatementList statementList) {
+      lastStatementReturns = false;
       for (var e: statementList.getChildren()) {
-        e.accept(this);
+        if (!lastStatementReturns) {
+          e.accept(this);
+          if (e.getClass() == Return.class){
+            lastStatementReturns = true;
+          }
+        } else {
+          addTypeError(statementList, "statementListError");
+          break;
+        }
       }
       return null;
     }

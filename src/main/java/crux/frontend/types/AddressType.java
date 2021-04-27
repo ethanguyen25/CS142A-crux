@@ -32,22 +32,23 @@ public final class AddressType extends Type {
   }
 
   @Override
-  public Type deref(){ //bool, int, array
+  public Type deref(){ //bool, int, array(?)
     if (equivalent(this)){
       return base;
-    } else if (base.getClass() != BoolType.class) {
-     return super.deref();
-    } else if (base.getClass() != IntType.class){
-      return super.deref();
-    } else if (base.getClass() != ArrayType.class){
-      return super.deref();
+    } else if (base.getClass() == BoolType.class) {
+     return base;
+    } else if (base.getClass() == IntType.class){
+      return  base;
+    } else if (base.getClass() == ArrayType.class) {
+      return base;
     }
     return super.deref();
+
   }
 
   @Override
   public Type index(Type other){
-    if (equivalent(other)){
+    if (base.getClass() == ArrayType.class){
       return new AddressType(base);
     }
     return super.index(other);
@@ -55,8 +56,8 @@ public final class AddressType extends Type {
 
   @Override
   public Type assign(Type other){
-    if (equivalent(other)){
-      return new AddressType(base);
+    if (getBaseType().equivalent(other)){  //if (base.equivalent(other))
+      return new VoidType(); //return new AddressType(base);
     }
     return super.assign(other);
   }
