@@ -46,12 +46,16 @@ public final class IntType extends Type {
 
   @Override
   public boolean equivalent(Type other) {
-    if (other.toString().equals("int")) {
-      return true;
-    }
-    return false;
+    return other.getClass() == IntType.class;
   }
 
+  @Override
+  public Type compare(Type other){
+    if (equivalent(other)) {
+      return new BoolType();
+    }
+    return super.compare(other);
+  }
 
 }
 

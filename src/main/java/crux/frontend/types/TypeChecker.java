@@ -77,11 +77,13 @@ public final class TypeChecker {
 
     @Override
     public Void visit(ArrayDeclaration arrayDeclaration) {
-      /*if (arrayDeclaration.getSymbol().getType().getClass() != IntType.class) {
+      if (((ArrayType) arrayDeclaration.getSymbol().getType()).getBase().equivalent(new IntType())) {
+        return null;
+      } else if (((ArrayType) arrayDeclaration.getSymbol().getType()).getBase().equivalent(new BoolType())) {
+        return null;
+      } else {
         addTypeError(arrayDeclaration, "arrayDeclarationError");
-      } else if (arrayDeclaration.getSymbol().getType().getClass() != BoolType.class) {
-        addTypeError(arrayDeclaration, "arrayDeclarationError");
-      }*/
+      }
       return null;
     }
 
@@ -98,7 +100,7 @@ public final class TypeChecker {
 
     @Override
     public Void visit(Break brk) {
-      //brk.accept(this);
+      hasBreak = true;
       lastStatementReturns = false;
       return null;
     }
@@ -118,7 +120,6 @@ public final class TypeChecker {
 
     @Override
     public Void visit(Continue cont) {
-      //cont.accept(this);
       lastStatementReturns = false;
       return null;
     }
@@ -169,6 +170,11 @@ public final class TypeChecker {
 
     @Override
     public Void visit(IfElseBranch ifElseBranch) {
+      for (var e: ifElseBranch.getCondition().getChildren()){
+        e.accept(this);
+      }
+      ifElseBranch.getCondition().accept(this);
+
       if (getType(ifElseBranch.getCondition()).getClass() != BoolType.class){
         addTypeError(ifElseBranch, "ifElseBranchError");
       }
@@ -188,7 +194,7 @@ public final class TypeChecker {
       access.getOffset().accept(this);
       Type bType = getType(access.getBase());
       Type oType = getType(access.getOffset());
-      //Type t = oType.index(bType);
+
       Type t = bType.index(oType);
 
       setNodeType(access, t);
@@ -209,11 +215,18 @@ public final class TypeChecker {
     }
 
     @Override
-    public Void visit(Loop loop) { //Do
+    public Void visit(Loop loop) { //if there is a break then there is no return. Need to set hasBreak and lastStatementReturns for each line
+      hasBreak = false;
       for (var e: loop.getBody().getChildren()){
         e.accept(this);
-        //hasBreak
       }
+
+      if (hasBreak){    //PRETTY SURE THIS IS WRONG
+        lastStatementReturns = false;
+      } else {
+        lastStatementReturns = true;
+      }
+
       return null;
     }
 
@@ -275,7 +288,7 @@ public final class TypeChecker {
     public Void visit(Return ret) {
       ret.getValue().accept(this);
       Type rtype = getType(ret.getValue());
-      if (rtype != currentFunctionReturnType){
+      if (rtype.getClass() != currentFunctionReturnType.getClass()){
         addTypeError(ret, "returnError");
       }
       return null;

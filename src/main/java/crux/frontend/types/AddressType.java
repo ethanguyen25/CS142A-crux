@@ -49,15 +49,15 @@ public final class AddressType extends Type {
   @Override
   public Type index(Type other){
     if (base.getClass() == ArrayType.class){
-      return new AddressType(base);
+      return new AddressType(((ArrayType) base).getBase());
     }
     return super.index(other);
   }
 
   @Override
   public Type assign(Type other){
-    if (getBaseType().equivalent(other)){  //if (base.equivalent(other))
-      return new VoidType(); //return new AddressType(base);
+    if (getBaseType().equivalent(other)){
+      return new VoidType();
     }
     return super.assign(other);
   }

@@ -29,30 +29,30 @@ public final class FuncType extends Type {
 
 
   @Override
-  public Type call(Type arguments){
-    if (arguments.equivalent(args)){
-      return this.ret;
+  public Type call(Type arguments) {
+    if (arguments.getClass() == TypeList.class){
+      if (arguments.equivalent(args)){
+        return this.ret;
+      }
     }
     return super.call(arguments);
 
-    /*if (equivalent(arguments)){
-      return this.ret;
-    }
-    return super.call(arguments);*/
   }
 
+
   @Override
-  public boolean equivalent(Type other){
-    if (other.getClass() == FuncType.class){
-      if (this.getRet().equivalent(((FuncType) other).getRet())){
-        if (this.getArgs().equivalent(((FuncType) other).getArgs())){
-          return true;
-        }
+  public boolean equivalent(Type other) {
+    if (other instanceof FuncType){
+      FuncType ft = (FuncType) other;
+      if (this.ret.equivalent(ft.ret)) {
+        return this.args.equivalent(ft.args);
       }
     }
     return false;
   }
 
 
-
 }
+
+
+

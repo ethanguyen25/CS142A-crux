@@ -44,4 +44,5 @@ public final class BoolType extends Type {
     }
     return super.compare(other);
   }
+
 }

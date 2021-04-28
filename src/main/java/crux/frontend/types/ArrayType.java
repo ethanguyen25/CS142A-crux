@@ -28,9 +28,11 @@ public final class ArrayType extends Type {
   }
 
   @Override
-  public boolean equivalent(Type that) {   //MIGHT BE WRONG LOOK HERE
+  public boolean equivalent(Type that) {   // WRONG !!!!!
     if (base.equivalent(that)) {
-      return true;
+      if( ((ArrayType) that).getExtent() == extent) {
+        return true;
+      }
     }
     return false;
   }

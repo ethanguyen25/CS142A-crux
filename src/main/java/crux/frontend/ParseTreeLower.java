@@ -180,11 +180,11 @@ public final class ParseTreeLower {
       List<Symbol> symList = new ArrayList<>();
       for (var e : ctx.parameterList().parameter()) {
         if (e.type().getText().equals("int")) {
-          tList.append(new IntType());
+          //tList.append(new IntType());  //Don't need to add again (?)
           symList.add(new Symbol(e.Identifier().getText(), new IntType()));
           symTab.add(pos, e.Identifier().getText(), new IntType()); //Adding func params to symTab
         } else if (e.type().getText().equals("bool")) {
-          tList.append(new BoolType());
+          //tList.append(new BoolType());  //Don't need to add again (?)
           symList.add(new Symbol(e.Identifier().getText(), new BoolType()));
           symTab.add(pos, e.Identifier().getText(), new BoolType()); //Adding func params to symTab
         }
