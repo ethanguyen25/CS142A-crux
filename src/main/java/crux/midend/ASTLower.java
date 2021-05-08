@@ -24,12 +24,44 @@ import java.util.stream.Collectors;
 // class so that the visit methods can return information to the
 // caller.
 
-public final class ASTLower implements NodeVisitor<Void> {
+class Pair {
+  Instruction start;
+  Instruction end;
+  Variable val;
+
+  Pair(Instruction start, Instruction end, Variable val) {
+    this.start= start;
+    this.end=end;
+    this.val = val;
+  }
+
+  Instruction getStart() {
+    return start;
+  }
+
+  Instruction getEnd() {
+    return end;
+  }
+
+  Variable getVal() {
+    return val;
+  }
+}
+
+
+
+
+public final class ASTLower implements NodeVisitor<Pair> {
   private Program mCurrentProgram = null;
   private Function mCurrentFunction = null;
 
   private Map<Symbol, Variable> mCurrentLocalVarMap = null;
   private TypeChecker checker;
+
+  //ADDED
+  public Instruction mLastInstruction;
+  public Value mCurrentValue;
+
 
   /**
    * A constructor to initialize member variables
@@ -45,7 +77,13 @@ public final class ASTLower implements NodeVisitor<Void> {
   }
 
   @Override
-  public Void visit(DeclarationList declarationList) {
+  public Pair visit(DeclarationList declarationList) {
+    mCurrentProgram = new Program();
+    for (var e: declarationList.getChildren())
+    {
+      e.accept(this);
+    }
+
     return null;
   }
 
@@ -54,12 +92,12 @@ public final class ASTLower implements NodeVisitor<Void> {
    */
 
   @Override
-  public Void visit(FunctionDefinition functionDefinition) {
+  public Pair visit(FunctionDefinition functionDefinition) {
     return null;
   }
 
   @Override
-  public Void visit(StatementList statementList) {
+  public Pair visit(StatementList statementList) {
     return null;
   }
 
@@ -68,7 +106,7 @@ public final class ASTLower implements NodeVisitor<Void> {
    */
 
   @Override
-  public Void visit(VariableDeclaration variableDeclaration) {
+  public Pair visit(VariableDeclaration variableDeclaration) {
     return null;
   }
 
@@ -77,12 +115,12 @@ public final class ASTLower implements NodeVisitor<Void> {
    */
 
   @Override
-  public Void visit(ArrayDeclaration arrayDeclaration) {
+  public Pair visit(ArrayDeclaration arrayDeclaration) {
     return null;
   }
 
   @Override
-  public Void visit(Name name) {
+  public Pair visit(Name name) {
     return null;
   }
 
@@ -91,7 +129,7 @@ public final class ASTLower implements NodeVisitor<Void> {
    */
 
   @Override
-  public Void visit(Assignment assignment) {
+  public Pair visit(Assignment assignment) {
     return null;
   }
 
@@ -100,7 +138,7 @@ public final class ASTLower implements NodeVisitor<Void> {
    */
 
   @Override
-  public Void visit(Call call) {
+  public Pair visit(Call call) {
     return null;
   }
 
@@ -110,16 +148,77 @@ public final class ASTLower implements NodeVisitor<Void> {
    */
 
   @Override
-  public Void visit(OpExpr operation) {
+  public Pair visit(OpExpr operation) {
+    Pair left = operation.getLeft().accept(this);
+    Pair right = operation.getRight().accept(this);
+    left.getEnd().setNext(0, right.getStart());
+
+    LocalVar tempVar = mCurrentFunction.getTempVar(checker.getType(operation));
+    LocalVar lhs = mCurrentFunction.getTempVar(left.getVal().getType());
+    LocalVar rhs = mCurrentFunction.getTempVar(right.getVal().getType());
+    switch (operation.getOp()){
+      case GE:
+        CompareInst geInst = new CompareInst(tempVar, CompareInst.Predicate.GE, lhs, rhs);
+        right.getEnd().setNext(0, geInst);
+        return new Pair(left.getStart(), geInst, tempVar);
+        //break;
+      case LE:
+        CompareInst leInst = new CompareInst(tempVar, CompareInst.Predicate.LE, lhs, rhs);
+        right.getEnd().setNext(0, leInst);
+        return new Pair(left.getStart(), leInst , tempVar);
+        //break;
+      case NE:
+        CompareInst neInst = new CompareInst(tempVar, CompareInst.Predicate.NE, lhs, rhs);
+        right.getEnd().setNext(0, neInst);
+        return new Pair(left.getStart(), neInst , tempVar);
+        //break;
+      case EQ:
+        CompareInst eqInst = new CompareInst(tempVar, CompareInst.Predicate.EQ, lhs, rhs);
+        right.getEnd().setNext(0, eqInst);
+        return new Pair(left.getStart(), eqInst , tempVar);
+        //break;
+      case GT:
+        CompareInst gtInst = new CompareInst(tempVar, CompareInst.Predicate.GT, lhs, rhs);
+        right.getEnd().setNext(0, gtInst);
+        return new Pair(left.getStart(), gtInst , tempVar);
+        //break;
+      case LT:
+        CompareInst ltInst = new CompareInst(tempVar, CompareInst.Predicate.LT, lhs, rhs);
+        right.getEnd().setNext(0, ltInst);
+        return new Pair(left.getStart(), ltInst , tempVar);
+        //break;
+      case ADD:
+        BinaryOperator addBO = new BinaryOperator(BinaryOperator.Op.Add, tempVar, lhs, rhs);
+        return new Pair(left.getStart(), addBO, tempVar);
+        //break;
+      case SUB:
+        BinaryOperator subBO = new BinaryOperator(BinaryOperator.Op.Sub, tempVar, lhs, rhs);
+        return new Pair(left.getStart(), subBO, tempVar);
+        //break;
+      case MULT:
+        BinaryOperator mulBO = new BinaryOperator(BinaryOperator.Op.Mul, tempVar, lhs, rhs);
+        return new Pair(left.getStart(), mulBO, tempVar);
+        //break;
+      case DIV:
+        BinaryOperator divBO = new BinaryOperator(BinaryOperator.Op.Div, tempVar, lhs, rhs);
+        return new Pair(left.getStart(), divBO, tempVar);
+        //break;
+      case LOGIC_AND:
+        //break;
+      case LOGIC_OR:
+        //break;
+      case LOGIC_NOT:
+        //break;
+    }
     return null;
   }
 
   @Override
-  public Void visit(Dereference dereference) {
+  public Pair visit(Dereference dereference) {
     return null;
   }
 
-  private Void visit(Expression expression) {
+  private Pair visit(Expression expression) {
     return null;
   }
 
@@ -128,7 +227,7 @@ public final class ASTLower implements NodeVisitor<Void> {
    */
 
   @Override
-  public Void visit(ArrayAccess access) {
+  public Pair visit(ArrayAccess access) {
     return null;
   }
 
@@ -137,8 +236,11 @@ public final class ASTLower implements NodeVisitor<Void> {
    */
 
   @Override
-  public Void visit(LiteralBool literalBool) {
-    return null;
+  public Pair visit(LiteralBool literalBool) {
+    BooleanConstant value = BooleanConstant.get(mCurrentProgram, literalBool.getValue());
+    LocalVar tempVar = mCurrentFunction.getTempVar(new BoolType());
+    CopyInst copyInst = new CopyInst(tempVar, value);
+    return new Pair(copyInst, copyInst, tempVar);
   }
 
   /**
@@ -146,8 +248,16 @@ public final class ASTLower implements NodeVisitor<Void> {
    */
 
   @Override
-  public Void visit(LiteralInt literalInt) {
-    return null;
+  public Pair visit(LiteralInt literalInt) {
+    IntegerConstant value = IntegerConstant.get(mCurrentProgram, literalInt.getValue());
+    LocalVar tempVar = mCurrentFunction.getTempVar(new IntType());
+    CopyInst copyInst = new CopyInst(tempVar, value);
+    return new Pair(copyInst, copyInst, tempVar);
+
+    /*addEdge(mLastInstruction, copyInst);
+    mCurrentValue = tempVar;
+    mLastInstruction = copyInst;
+    return null;*/
   }
 
   /**
@@ -155,7 +265,7 @@ public final class ASTLower implements NodeVisitor<Void> {
    */
 
   @Override
-  public Void visit(Return ret) {
+  public Pair visit(Return ret) {
     return null;
   }
 
@@ -164,7 +274,7 @@ public final class ASTLower implements NodeVisitor<Void> {
    */
 
   @Override
-  public Void visit(Break brk) {
+  public Pair visit(Break brk) {
     return null;
   }
 
@@ -173,7 +283,7 @@ public final class ASTLower implements NodeVisitor<Void> {
    */
 
   @Override
-  public Void visit(Continue cnt) {
+  public Pair visit(Continue cnt) {
     return null;
   }
 
@@ -182,7 +292,7 @@ public final class ASTLower implements NodeVisitor<Void> {
    */
 
   @Override
-  public Void visit(IfElseBranch ifElseBranch) {
+  public Pair visit(IfElseBranch ifElseBranch) {
     return null;
   }
 
@@ -191,7 +301,7 @@ public final class ASTLower implements NodeVisitor<Void> {
    */
 
   @Override
-  public Void visit(Loop loop) {
+  public Pair visit(Loop loop) {
     return null;
   }
 }

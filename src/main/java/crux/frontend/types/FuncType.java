@@ -54,5 +54,3 @@ public final class FuncType extends Type {
 
 }
 
-
-
