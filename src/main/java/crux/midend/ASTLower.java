@@ -58,9 +58,9 @@ public final class ASTLower implements NodeVisitor<Pair> {
   private Map<Symbol, Variable> mCurrentLocalVarMap = null;
   private TypeChecker checker;
 
-  //ADDED
-  public Instruction mLastInstruction;
-  public Value mCurrentValue;
+//  //ADDED
+//  public Instruction mLastInstruction;
+//  public Value mCurrentValue;
 
 
   /**
@@ -93,11 +93,42 @@ public final class ASTLower implements NodeVisitor<Pair> {
 
   @Override
   public Pair visit(FunctionDefinition functionDefinition) {
+    mCurrentLocalVarMap = new HashMap<>();
+
+    String name = functionDefinition.getSymbol().getName();
+    Type retType = ((FuncType) functionDefinition.getSymbol().getType()).getRet();
+    TypeList tList = TypeList.of();
+    List<LocalVar> args = new ArrayList<>();
+    for (var e: functionDefinition.getParameters()){
+      tList.append(e.getType());
+
+      LocalVar lvar = mCurrentFunction.getTempVar(e.getType(), e.getName());
+      mCurrentLocalVarMap.put(e, lvar);
+      args.add(lvar);
+    }
+    mCurrentFunction = new Function(name, new FuncType(tList, retType));
+
+    mCurrentFunction.setArguments(args);
+    mCurrentFunction.setStart(new NopInst());
+
+    for (var e: functionDefinition.getStatements().getChildren()){
+      e.accept(this);
+    }
+
+    mCurrentProgram.addFunction(mCurrentFunction);
+
+    mCurrentLocalVarMap = null;
+    mCurrentFunction = null;
+
     return null;
   }
 
   @Override
   public Pair visit(StatementList statementList) {
+    for (var e: statementList.getChildren()){
+      e.accept(this);
+    }
+
     return null;
   }
 
@@ -107,6 +138,17 @@ public final class ASTLower implements NodeVisitor<Pair> {
 
   @Override
   public Pair visit(VariableDeclaration variableDeclaration) {
+    if (mCurrentFunction == null){
+      IntegerConstant c = IntegerConstant.get(mCurrentProgram, 1); //For Constant, if not an array, then its supposed to be 1
+      var global = new GlobalDecl(variableDeclaration.getSymbol(), c);
+      mCurrentProgram.addGlobalVar(global);
+    } else {
+      Type t = variableDeclaration.getSymbol().getType();
+      String name = variableDeclaration.getSymbol().getName();
+      LocalVar lvar = mCurrentFunction.getTempVar(t, name);
+      mCurrentLocalVarMap.put(variableDeclaration.getSymbol(), lvar);
+    }
+
     return null;
   }
 
@@ -116,12 +158,17 @@ public final class ASTLower implements NodeVisitor<Pair> {
 
   @Override
   public Pair visit(ArrayDeclaration arrayDeclaration) {
+//    ((ArrayType) arrayDeclaration).getExtent();
+//    IntegerConstant ic = new IntegerConstant(mCurrentProgram, );
+
     return null;
   }
 
   @Override
   public Pair visit(Name name) {
-    return null;
+    Variable var = mCurrentLocalVarMap.get(name);
+    NopInst nop = new NopInst();
+    return new Pair(nop, nop, var);
   }
 
   /**
@@ -139,6 +186,25 @@ public final class ASTLower implements NodeVisitor<Pair> {
 
   @Override
   public Pair visit(Call call) {
+    List<LocalVar> list = new ArrayList<>();
+    Pair previousInst = null;
+    for (var e: call.getArguments()){
+      previousInst = e.accept(this);
+//    var something = previousInst.getVal().
+      LocalVar lvar = mCurrentFunction.getTempVar(checker.getType(e));
+      //LocalVar lvar = new LocalVar(checker.getType(e));
+      list.add(lvar);
+    }
+
+    Symbol calleeAddr = call.getCallee();
+    Type calleeType = calleeAddr.getType();  //Why cast to FuncType ???
+
+    LocalVar retType = mCurrentFunction.getTempVar(((FuncType) calleeType).getRet());
+    var callInst = new CallInst(calleeAddr, list);
+
+
+    previousInst.getEnd().setNext(0,callInst);
+
     return null;
   }
 
@@ -204,6 +270,7 @@ public final class ASTLower implements NodeVisitor<Pair> {
         return new Pair(left.getStart(), divBO, tempVar);
         //break;
       case LOGIC_AND:
+
         //break;
       case LOGIC_OR:
         //break;
@@ -240,6 +307,7 @@ public final class ASTLower implements NodeVisitor<Pair> {
     BooleanConstant value = BooleanConstant.get(mCurrentProgram, literalBool.getValue());
     LocalVar tempVar = mCurrentFunction.getTempVar(new BoolType());
     CopyInst copyInst = new CopyInst(tempVar, value);
+    mCurrentFunction.getStart().setNext(0, copyInst);
     return new Pair(copyInst, copyInst, tempVar);
   }
 
@@ -252,6 +320,7 @@ public final class ASTLower implements NodeVisitor<Pair> {
     IntegerConstant value = IntegerConstant.get(mCurrentProgram, literalInt.getValue());
     LocalVar tempVar = mCurrentFunction.getTempVar(new IntType());
     CopyInst copyInst = new CopyInst(tempVar, value);
+    mCurrentFunction.getStart().setNext(0, copyInst);
     return new Pair(copyInst, copyInst, tempVar);
 
     /*addEdge(mLastInstruction, copyInst);
@@ -293,6 +362,8 @@ public final class ASTLower implements NodeVisitor<Pair> {
 
   @Override
   public Pair visit(IfElseBranch ifElseBranch) {
+    //JumpInst: if true go to edge1, (else) the default for JumpInst is edge0
+
     return null;
   }
 
