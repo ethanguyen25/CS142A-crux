@@ -125,11 +125,19 @@ public final class ASTLower implements NodeVisitor<Pair> {
 
   @Override
   public Pair visit(StatementList statementList) {
+    Instruction firstInst = null;
+    Instruction lastInst = null;
     for (var e: statementList.getChildren()){
-      e.accept(this);
+      Pair statement = e.accept(this);
+      if (firstInst == null){
+        firstInst = statement.getStart();
+      } else {
+        lastInst.setNext(0, statement.getStart());
+      }
+      lastInst = statement.getEnd();
     }
 
-    return null;
+    return new Pair(firstInst, lastInst, null);
   }
 
   /**
@@ -166,7 +174,14 @@ public final class ASTLower implements NodeVisitor<Pair> {
 
   @Override
   public Pair visit(Name name) {
-    Variable var = mCurrentLocalVarMap.get(name);
+    Symbol sym = name.getSymbol();
+//    if (!mCurrentLocalVarMap.containsKey(sym)){
+//      LocalVar lvar = mCurrentFunction.getTempVar(sym.getType());
+//      mCurrentLocalVarMap.put(sym, lvar);
+//    }
+    Variable var = mCurrentLocalVarMap.get(sym);
+
+
     NopInst nop = new NopInst();
     return new Pair(nop, nop, var);
   }
@@ -177,7 +192,25 @@ public final class ASTLower implements NodeVisitor<Pair> {
 
   @Override
   public Pair visit(Assignment assignment) {
-    return null;
+//    Pair lhs = visit(assignment.getLocation());
+//    Pair rhs = visit(assignment.getValue());
+    Pair lhs = assignment.getLocation().accept(this);
+    Pair rhs = assignment.getValue().accept(this);
+
+    if (lhs.getVal() instanceof LocalVar){
+      LocalVar lhsVar = mCurrentFunction.getTempVar(lhs.getVal().getType());
+      CopyInst copyInst = new CopyInst(lhsVar, rhs.getVal());
+      rhs.getEnd().setNext(0,copyInst);
+      return new Pair(rhs.getStart(), copyInst, null);
+    } else {
+      //If the location (lhs) is global AND a Name, create AddressAt !!!!!!
+      AddressVar addrVar = new AddressVar(lhs.getVal().getType());
+      LocalVar rhsVar = mCurrentFunction.getTempVar(rhs.getVal().getType());
+      var storeInst = new StoreInst(rhsVar, addrVar);
+      rhs.getEnd().setNext(0, storeInst);
+      return new Pair(rhs.getStart(), storeInst, null);
+    }
+
   }
 
   /**
@@ -188,11 +221,14 @@ public final class ASTLower implements NodeVisitor<Pair> {
   public Pair visit(Call call) {
     List<LocalVar> list = new ArrayList<>();
     Pair previousInst = null;
+//    Pair previousInstStart = null;
     for (var e: call.getArguments()){
       previousInst = e.accept(this);
 //    var something = previousInst.getVal().
-      LocalVar lvar = mCurrentFunction.getTempVar(checker.getType(e));
-      //LocalVar lvar = new LocalVar(checker.getType(e));
+      //LocalVar lvar = mCurrentFunction.getTempVar(checker.getType(e));
+      LocalVar lvar = new LocalVar(checker.getType(e));
+//      if (previousInstStart != null)
+//      previousInst.getEnd().setNext(0, );
       list.add(lvar);
     }
 
