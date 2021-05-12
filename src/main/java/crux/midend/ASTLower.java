@@ -252,7 +252,7 @@ public final class ASTLower implements NodeVisitor<Pair> {
 
 
     previousInst.getEnd().setNext(0,callInst);
-    return new Pair(previousInst.getStart(), previousInst.getEnd(), null); //callInst for test3 to pass
+    return new Pair(previousInst.getStart(), callInst, null); //callInst or previousInst.getEnd()
   }
 
   /**
@@ -267,57 +267,60 @@ public final class ASTLower implements NodeVisitor<Pair> {
     left.getEnd().setNext(0, right.getStart());
 
     LocalVar tempVar = mCurrentFunction.getTempVar(checker.getType(operation));
-    LocalVar lhs = mCurrentFunction.getTempVar(left.getVal().getType());
-    LocalVar rhs = mCurrentFunction.getTempVar(right.getVal().getType());
+//    LocalVar lhs = mCurrentFunction.getTempVar(left.getVal().getType());
+//    LocalVar rhs = mCurrentFunction.getTempVar(right.getVal().getType());
     switch (operation.getOp()){
       case GE:
-        CompareInst geInst = new CompareInst(tempVar, CompareInst.Predicate.GE, lhs, rhs);
+        CompareInst geInst = new CompareInst(tempVar, CompareInst.Predicate.GE, (LocalVar)left.getVal(), (LocalVar) right.getVal());
         right.getEnd().setNext(0, geInst);
         return new Pair(left.getStart(), geInst, tempVar);
         //break;
       case LE:
-        CompareInst leInst = new CompareInst(tempVar, CompareInst.Predicate.LE, lhs, rhs);
+        CompareInst leInst = new CompareInst(tempVar, CompareInst.Predicate.LE, (LocalVar)left.getVal(), (LocalVar) right.getVal());
         right.getEnd().setNext(0, leInst);
         return new Pair(left.getStart(), leInst , tempVar);
         //break;
       case NE:
-        CompareInst neInst = new CompareInst(tempVar, CompareInst.Predicate.NE, lhs, rhs);
+        CompareInst neInst = new CompareInst(tempVar, CompareInst.Predicate.NE, (LocalVar)left.getVal(), (LocalVar) right.getVal());
         right.getEnd().setNext(0, neInst);
         return new Pair(left.getStart(), neInst , tempVar);
         //break;
       case EQ:
-        CompareInst eqInst = new CompareInst(tempVar, CompareInst.Predicate.EQ, lhs, rhs);
+        CompareInst eqInst = new CompareInst(tempVar, CompareInst.Predicate.EQ, (LocalVar)left.getVal(), (LocalVar) right.getVal());
         right.getEnd().setNext(0, eqInst);
         return new Pair(left.getStart(), eqInst , tempVar);
         //break;
       case GT:
-        CompareInst gtInst = new CompareInst(tempVar, CompareInst.Predicate.GT, lhs, rhs);
+        CompareInst gtInst = new CompareInst(tempVar, CompareInst.Predicate.GT, (LocalVar)left.getVal(), (LocalVar) right.getVal());
         right.getEnd().setNext(0, gtInst);
         return new Pair(left.getStart(), gtInst , tempVar);
         //break;
       case LT:
-        CompareInst ltInst = new CompareInst(tempVar, CompareInst.Predicate.LT, lhs, rhs);
+        CompareInst ltInst = new CompareInst(tempVar, CompareInst.Predicate.LT, (LocalVar)left.getVal(), (LocalVar) right.getVal());
         right.getEnd().setNext(0, ltInst);
         return new Pair(left.getStart(), ltInst , tempVar);
         //break;
       case ADD:
-        BinaryOperator addBO = new BinaryOperator(BinaryOperator.Op.Add, tempVar, lhs, rhs);
+        BinaryOperator addBO = new BinaryOperator(BinaryOperator.Op.Add, tempVar, (LocalVar) left.getVal(), (LocalVar) right.getVal());
+        right.getEnd().setNext(0, addBO);
         return new Pair(left.getStart(), addBO, tempVar);
         //break;
       case SUB:
-        BinaryOperator subBO = new BinaryOperator(BinaryOperator.Op.Sub, tempVar, lhs, rhs);
+        BinaryOperator subBO = new BinaryOperator(BinaryOperator.Op.Sub, tempVar, (LocalVar)left.getVal(), (LocalVar) right.getVal());
+        right.getEnd().setNext(0, subBO);
         return new Pair(left.getStart(), subBO, tempVar);
         //break;
       case MULT:
-        BinaryOperator mulBO = new BinaryOperator(BinaryOperator.Op.Mul, tempVar, lhs, rhs);
+        BinaryOperator mulBO = new BinaryOperator(BinaryOperator.Op.Mul, tempVar, (LocalVar)left.getVal(), (LocalVar) right.getVal());
+        right.getEnd().setNext(0, mulBO);
         return new Pair(left.getStart(), mulBO, tempVar);
         //break;
       case DIV:
-        BinaryOperator divBO = new BinaryOperator(BinaryOperator.Op.Div, tempVar, lhs, rhs);
+        BinaryOperator divBO = new BinaryOperator(BinaryOperator.Op.Div, tempVar, (LocalVar)left.getVal(), (LocalVar) right.getVal());
+        right.getEnd().setNext(0, divBO);
         return new Pair(left.getStart(), divBO, tempVar);
         //break;
       case LOGIC_AND:
-
         //break;
       case LOGIC_OR:
         //break;
