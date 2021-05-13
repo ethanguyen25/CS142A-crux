@@ -30,8 +30,8 @@ class Pair {
   Variable val;
 
   Pair(Instruction start, Instruction end, Variable val) {
-    this.start= start;
-    this.end=end;
+    this.start = start;
+    this.end = end;
     this.val = val;
   }
 
@@ -102,7 +102,11 @@ public final class ASTLower implements NodeVisitor<Pair> {
     for (var e: functionDefinition.getParameters()){
       tList.append(e.getType());
 
-      LocalVar lvar = mCurrentFunction.getTempVar(e.getType(), e.getName());
+//      LocalVar lvar = mCurrentFunction.getTempVar(e.getType(), e.getName());  //CANT USE mCurrFunc BEFORE CRESTING RIGHT ???
+//      mCurrentLocalVarMap.put(e, lvar);
+//      args.add(lvar);
+
+      LocalVar lvar = new LocalVar(e.getType(), e.getName());
       mCurrentLocalVarMap.put(e, lvar);
       args.add(lvar);
     }
@@ -141,7 +145,7 @@ public final class ASTLower implements NodeVisitor<Pair> {
     for (var e: statementList.getChildren()){
       Pair statement = e.accept(this);
       if (firstInst == null){
-        firstInst = statement.getStart();
+          firstInst = statement.getStart();
       } else {
         lastInst.setNext(0, statement.getStart());
       }
@@ -161,14 +165,16 @@ public final class ASTLower implements NodeVisitor<Pair> {
       IntegerConstant ic = IntegerConstant.get(mCurrentProgram, 1); //For Constant, if not an array, then its supposed to be 1
       var global = new GlobalDecl(variableDeclaration.getSymbol(), ic);
       mCurrentProgram.addGlobalVar(global);
+      return null;
     } else {
       Type t = variableDeclaration.getSymbol().getType();
       String name = variableDeclaration.getSymbol().getName();
       LocalVar lvar = mCurrentFunction.getTempVar(t, name);
       mCurrentLocalVarMap.put(variableDeclaration.getSymbol(), lvar);
+      NopInst nop = new NopInst();
+      return new Pair(nop, nop, lvar);
     }
 
-    return null;
   }
 
   /**
@@ -205,27 +211,38 @@ public final class ASTLower implements NodeVisitor<Pair> {
 
   @Override
   public Pair visit(Assignment assignment) {
+    Instruction tempInst = null;  //NEW
     Pair lhs = assignment.getLocation().accept(this);
     Pair rhs = assignment.getValue().accept(this);
 
     if (lhs.getVal() instanceof LocalVar){
-      LocalVar lhsVar = mCurrentFunction.getTempVar(lhs.getVal().getType());
-      CopyInst copyInst = new CopyInst(lhsVar, rhs.getVal());
+//      LocalVar lhsVar = mCurrentFunction.getTempVar(lhs.getVal().getType());  //DONT NEED
+      CopyInst copyInst = new CopyInst((LocalVar) lhs.getVal(), rhs.getVal());
       rhs.getEnd().setNext(0,copyInst);
       return new Pair(rhs.getStart(), copyInst, null);
     } else {
-      //If the location (lhs) is global AND a Name, create AddressAt !!!!!!
       Value val;
       val = lhs.getVal();
       if (assignment.getLocation() instanceof Name){
         val = mCurrentFunction.getTempAddressVar(((Name) assignment.getLocation()).getSymbol().getType());
         AddressAt aa = new AddressAt((AddressVar) val, ((Name) assignment.getLocation()).getSymbol());
-        rhs.getEnd().setNext(0, aa);
+//        rhs.getEnd().setNext(0, aa);
+
+        Pair aaPair = new Pair(aa, aa, null); //NEW
+        tempInst = aaPair.getStart();  //NEW
       }
 
-      LocalVar rhsVar = mCurrentFunction.getTempVar(rhs.getVal().getType());
-      StoreInst storeInst = new StoreInst(rhsVar, (AddressVar) val);
-      rhs.getEnd().setNext(0, storeInst);
+      StoreInst storeInst = new StoreInst((LocalVar) rhs.getVal(), (AddressVar) val);
+//      rhs.getEnd().setNext(0, storeInst);
+
+      Pair siPair = new Pair(storeInst, storeInst, null);  //NEW
+      if (tempInst != null){
+        tempInst.setNext(0,storeInst);
+      } else {
+        tempInst = siPair.getStart();
+      }
+      rhs.getEnd().setNext(0, tempInst);  //NEW
+
       return new Pair(rhs.getStart(), storeInst, null);
     }
 
@@ -248,11 +265,15 @@ public final class ASTLower implements NodeVisitor<Pair> {
     Type calleeType = calleeAddr.getType();  //Why cast to FuncType ???
 
     LocalVar retType = mCurrentFunction.getTempVar(((FuncType) calleeType).getRet());
-    var callInst = new CallInst(retType, calleeAddr, list);
+    CallInst callInst = new CallInst(retType, calleeAddr, list);
 
 
-    previousInst.getEnd().setNext(0,callInst);
-    return new Pair(previousInst.getStart(), callInst, null); //callInst or previousInst.getEnd()
+    if (previousInst != null){
+      previousInst.getEnd().setNext(0,callInst);
+      return new Pair(previousInst.getStart(), callInst, null); //callInst or previousInst.getEnd()
+    }
+
+    return new Pair(callInst, callInst, null);
   }
 
   /**
@@ -332,13 +353,14 @@ public final class ASTLower implements NodeVisitor<Pair> {
 
   @Override
   public Pair visit(Dereference dereference) {
-    Pair addr = dereference.accept(this);
+    Instruction tempInst = null; //NEW
+    Pair addr = dereference.getAddress().accept(this);
 
     if (addr.getVal() instanceof LocalVar && addr.getVal() != null){
       LocalVar destTemp = mCurrentFunction.getTempVar(addr.getVal().getType());
       CopyInst copyInst = new CopyInst(destTemp, addr.getVal());
-      addr.getEnd().setNext(0, copyInst);   //NOT SURE IF addr is previous Instruction
-      return new Pair(addr.getStart(), copyInst, null);
+      addr.getEnd().setNext(0, copyInst);
+      return new Pair(addr.getStart(), copyInst, addr.getVal());
     } else {
       Value val;
       val = addr.getVal();
@@ -346,12 +368,24 @@ public final class ASTLower implements NodeVisitor<Pair> {
         Type addrType = ((Name) dereference.getAddress()).getSymbol().getType();
         val = mCurrentFunction.getTempAddressVar(addrType);
         AddressAt aa = new AddressAt((AddressVar) val, ((Name) dereference.getAddress()).getSymbol());
-        addr.getEnd().setNext(0, aa);
+//        addr.getEnd().setNext(0, aa);
+
+        Pair aaPair = new Pair(aa, aa, null); //NEW
+        tempInst = aaPair.getStart(); //NEW
       }
-      LocalVar destTemp = mCurrentFunction.getTempVar(addr.getVal().getType());
+      LocalVar destTemp = mCurrentFunction.getTempVar(val.getType()); //MAYBE NULL !!!
       LoadInst lInst = new LoadInst(destTemp, (AddressVar) val);
-      addr.getEnd().setNext(0, lInst);
-      return new Pair(addr.getStart(), lInst, null);
+//      addr.getEnd().setNext(0, lInst);
+
+      Pair liPair = new Pair(lInst, lInst, null);  //NEW
+      if (tempInst != null){
+        tempInst.setNext(0, lInst);
+      } else {
+        tempInst = liPair.getStart();
+      }
+      addr.getEnd().setNext(0,tempInst);  //NEW
+
+      return new Pair(addr.getStart(), lInst, destTemp);
     }
 
   }
