@@ -181,14 +181,17 @@ public final class ParseTreeLower {
       for (var e : ctx.parameterList().parameter()) {
         if (e.type().getText().equals("int")) {
           //tList.append(new IntType());  //Don't need to add again (?)
-          symList.add(new Symbol(e.Identifier().getText(), new IntType()));
-          symTab.add(pos, e.Identifier().getText(), new IntType()); //Adding func params to symTab
+//          symList.add(new Symbol(e.Identifier().getText(), new IntType()));  //CREATED A SYMBOL HERE AND IN SYMTAB.ADD WHICH CAUSED 2 DIFFERENT SYMBOLS TO BE ADDED
+          Symbol s = symTab.add(pos, e.Identifier().getText(), new IntType()); //Adding func params to symTab
+          symList.add(s);
         } else if (e.type().getText().equals("bool")) {
           //tList.append(new BoolType());  //Don't need to add again (?)
-          symList.add(new Symbol(e.Identifier().getText(), new BoolType()));
-          symTab.add(pos, e.Identifier().getText(), new BoolType()); //Adding func params to symTab
+//          symList.add(new Symbol(e.Identifier().getText(), new BoolType()));  //CREATED A SYMBOL HERE AND IN SYMTAB.ADD WHICH CAUSED 2 DIFFERENT SYMBOLS TO BE ADDED
+          Symbol s = symTab.add(pos, e.Identifier().getText(), new BoolType()); //Adding func params to symTab
+          symList.add(s);
         }
       }
+
 
       StatementList funcBody = lower(ctx.statementBlock());
 

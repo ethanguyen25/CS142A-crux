@@ -96,39 +96,20 @@ public final class ASTLower implements NodeVisitor<Pair> {
     mCurrentLocalVarMap = new HashMap<>();
 
     String name = functionDefinition.getSymbol().getName();
-    Type retType = ((FuncType) functionDefinition.getSymbol().getType()).getRet();
-    TypeList tList = TypeList.of();
+    mCurrentFunction = new Function(name, (FuncType) functionDefinition.getSymbol().getType());
+
     List<LocalVar> args = new ArrayList<>();
     for (var e: functionDefinition.getParameters()){
-      tList.append(e.getType());
-
-//      LocalVar lvar = mCurrentFunction.getTempVar(e.getType(), e.getName());  //CANT USE mCurrFunc BEFORE CRESTING RIGHT ???
-//      mCurrentLocalVarMap.put(e, lvar);
-//      args.add(lvar);
-
-      LocalVar lvar = new LocalVar(e.getType(), e.getName());
+      LocalVar lvar = mCurrentFunction.getTempVar(e.getType(), e.getName());
       mCurrentLocalVarMap.put(e, lvar);
       args.add(lvar);
     }
-    mCurrentFunction = new Function(name, new FuncType(tList, retType));
 
     mCurrentFunction.setArguments(args);
     mCurrentFunction.setStart(new NopInst());
 
     Pair temp = functionDefinition.getStatements().accept(this);
     mCurrentFunction.getStart().setNext(0, temp.start);
-//    Instruction firstInst = null;
-//    Instruction lastInst = null;
-//    for (var e: functionDefinition.getStatements().getChildren()){
-//      Pair statement = e.accept(this);
-//      if (firstInst == null){
-//        firstInst = statement.getStart();
-//      } else {
-//        lastInst.setNext(0, statement.getStart());
-//      }
-//      lastInst = statement.getEnd();
-//      mCurrentFunction.getStart().setNext(0,firstInst);
-//    }
 
     mCurrentProgram.addFunction(mCurrentFunction);
 
@@ -195,10 +176,7 @@ public final class ASTLower implements NodeVisitor<Pair> {
   @Override
   public Pair visit(Name name) {
     Symbol sym = name.getSymbol();
-//    if (!mCurrentLocalVarMap.containsKey(sym)){
-//      LocalVar lvar = mCurrentFunction.getTempVar(sym.getType());
-//      mCurrentLocalVarMap.put(sym, lvar);
-//    }
+
     Variable var = mCurrentLocalVarMap.get(sym);
 
     NopInst nop = new NopInst();
@@ -265,6 +243,7 @@ public final class ASTLower implements NodeVisitor<Pair> {
     Type calleeType = calleeAddr.getType();  //Why cast to FuncType ???
 
     LocalVar retType = mCurrentFunction.getTempVar(((FuncType) calleeType).getRet());
+//    for (mCurrentProgram.getFunctions())
     CallInst callInst = new CallInst(retType, calleeAddr, list);
 
 
@@ -365,6 +344,8 @@ public final class ASTLower implements NodeVisitor<Pair> {
       Value val;
       val = addr.getVal();
       if (dereference.getAddress() instanceof Name) {
+//        LocalVar offset = mCurrentFunction.getTempVar(((Name) dereference.getAddress()).getSymbol().getType());
+
         Type addrType = ((Name) dereference.getAddress()).getSymbol().getType();
         val = mCurrentFunction.getTempAddressVar(addrType);
         AddressAt aa = new AddressAt((AddressVar) val, ((Name) dereference.getAddress()).getSymbol());
@@ -408,7 +389,7 @@ public final class ASTLower implements NodeVisitor<Pair> {
     LocalVar lvar = mCurrentFunction.getTempVar(offset.getVal().getType());
 
     AddressAt aa = new AddressAt(tempAddrVar, access.getBase().getSymbol(), lvar);
-    return null;  //WHAT DO WE RETURN
+    return new Pair(aa, aa, offset.getVal());  //WHAT DO WE RETURN
   }
 
   /**
@@ -449,7 +430,10 @@ public final class ASTLower implements NodeVisitor<Pair> {
 
   @Override
   public Pair visit(Return ret) {
-    return null;
+    Pair retPair = ret.accept(this);
+    ReturnInst retInst = new ReturnInst((LocalVar) retPair.getVal());
+
+    return new Pair(retInst, retInst, retPair.getVal());
   }
 
   /**
@@ -478,7 +462,25 @@ public final class ASTLower implements NodeVisitor<Pair> {
   public Pair visit(IfElseBranch ifElseBranch) {
     //JumpInst: if true go to edge1, (else) the default for JumpInst is edge0
 
-    return null;
+    Pair condPair = ifElseBranch.getCondition().accept(this);
+
+    JumpInst jInst = new JumpInst((LocalVar) condPair.getVal());
+    condPair.getEnd().setNext(0, jInst);
+
+    NopInst endNop = new NopInst();
+
+    Pair trueBlock = ifElseBranch.getThenBlock().accept(this);
+    jInst.setNext(1, trueBlock.getStart());
+    trueBlock.getEnd().setNext(0, endNop);
+
+    Pair falseBlock = ifElseBranch.getElseBlock().accept(this);
+    if (falseBlock.getStart() != null && falseBlock.getEnd() != null && falseBlock.getVal() != null){
+      jInst.setNext(0, falseBlock.getStart());
+      falseBlock.getEnd().setNext(0, endNop);
+    }
+
+
+    return new Pair(condPair.getStart(), endNop, condPair.getVal());
   }
 
   /**
@@ -487,6 +489,8 @@ public final class ASTLower implements NodeVisitor<Pair> {
 
   @Override
   public Pair visit(Loop loop) {
+    //see break, exit to join block
+
     return null;
   }
 }
