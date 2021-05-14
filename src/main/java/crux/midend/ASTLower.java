@@ -193,11 +193,13 @@ public final class ASTLower implements NodeVisitor<Pair> {
     Pair lhs = assignment.getLocation().accept(this);
     Pair rhs = assignment.getValue().accept(this);
 
+    lhs.getEnd().setNext(0, rhs.getStart());  //NEW
+
     if (lhs.getVal() instanceof LocalVar){
 //      LocalVar lhsVar = mCurrentFunction.getTempVar(lhs.getVal().getType());  //DONT NEED
       CopyInst copyInst = new CopyInst((LocalVar) lhs.getVal(), rhs.getVal());
       rhs.getEnd().setNext(0,copyInst);
-      return new Pair(rhs.getStart(), copyInst, null);
+      return new Pair(lhs.getStart(), copyInst, null);  //CHANGED FROM rhs.getStart() to lhs.getStart()
     } else {
       Value val;
       val = lhs.getVal();
@@ -221,7 +223,7 @@ public final class ASTLower implements NodeVisitor<Pair> {
       }
       rhs.getEnd().setNext(0, tempInst);  //NEW
 
-      return new Pair(rhs.getStart(), storeInst, null);
+      return new Pair(lhs.getStart(), storeInst, null);
     }
 
   }
@@ -341,8 +343,7 @@ public final class ASTLower implements NodeVisitor<Pair> {
       addr.getEnd().setNext(0, copyInst);
       return new Pair(addr.getStart(), copyInst, addr.getVal());
     } else {
-      Value val;
-      val = addr.getVal();
+      Value val = addr.getVal();
       if (dereference.getAddress() instanceof Name) {
 //        LocalVar offset = mCurrentFunction.getTempVar(((Name) dereference.getAddress()).getSymbol().getType());
 
@@ -354,6 +355,7 @@ public final class ASTLower implements NodeVisitor<Pair> {
         Pair aaPair = new Pair(aa, aa, null); //NEW
         tempInst = aaPair.getStart(); //NEW
       }
+
       LocalVar destTemp = mCurrentFunction.getTempVar(val.getType()); //MAYBE NULL !!!
       LoadInst lInst = new LoadInst(destTemp, (AddressVar) val);
 //      addr.getEnd().setNext(0, lInst);
@@ -384,12 +386,15 @@ public final class ASTLower implements NodeVisitor<Pair> {
   @Override
   public Pair visit(ArrayAccess access) {
     Pair offset = access.getOffset().accept(this);
-    Type baseType = access.getBase().getSymbol().getType();
-    AddressVar tempAddrVar = mCurrentFunction.getTempAddressVar(baseType);
-    LocalVar lvar = mCurrentFunction.getTempVar(offset.getVal().getType());
 
-    AddressAt aa = new AddressAt(tempAddrVar, access.getBase().getSymbol(), lvar);
-    return new Pair(aa, aa, offset.getVal());  //WHAT DO WE RETURN
+    Type baseType = access.getBase().getSymbol().getType();
+    ArrayType arrType = (ArrayType) baseType;
+    AddressVar tempAddrVar = mCurrentFunction.getTempAddressVar(arrType.getBase());
+//    LocalVar lvar = mCurrentFunction.getTempVar(offset.getVal().getType());
+
+    AddressAt aa = new AddressAt(tempAddrVar, access.getBase().getSymbol(), (LocalVar) offset.getVal());  //Last param supposed to be (LocalVar) offset.getVal() or lvar ???
+    offset.getEnd().setNext(0,aa);
+    return new Pair(offset.getStart(), aa, tempAddrVar);  //WHAT DO WE RETURN
   }
 
   /**
@@ -494,3 +499,5 @@ public final class ASTLower implements NodeVisitor<Pair> {
     return null;
   }
 }
+
+
