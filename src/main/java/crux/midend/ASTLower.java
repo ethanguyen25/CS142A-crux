@@ -251,10 +251,11 @@ public final class ASTLower implements NodeVisitor<Pair> {
 
     if (previousInst != null){
       previousInst.getEnd().setNext(0,callInst);
-      return new Pair(previousInst.getStart(), callInst, null); //callInst or previousInst.getEnd()
+      return new Pair(previousInst.getStart(), callInst, previousInst.getVal());
     }
 
-    return new Pair(callInst, callInst, null);
+//    LocalVar temp = mCurrentFunction.getTempVar(((FuncType) calleeType).getRet());
+    return new Pair(callInst, callInst, callInst.getDst()); //temp OR null OR retType OR callInst.getDst()
   }
 
   /**
@@ -406,12 +407,6 @@ public final class ASTLower implements NodeVisitor<Pair> {
     BooleanConstant value = BooleanConstant.get(mCurrentProgram, literalBool.getValue());
     LocalVar tempVar = mCurrentFunction.getTempVar(new BoolType());
     CopyInst copyInst = new CopyInst(tempVar, value);
-//    mCurrentFunction.getStart().getNext(mCurrentFunction.getStart().numNext()).setNext(0, copyInst);
-//    if (mCurrentFunction.getStart().numNext() == 0){
-//      mCurrentFunction.getStart().setNext(0, copyInst);
-//    } else {
-//      mCurrentFunction.getStart().getNext(mCurrentFunction.getStart().numNext()-1).setNext(0, copyInst);
-//    }
 
     return new Pair(copyInst, copyInst, tempVar);
   }
@@ -435,10 +430,11 @@ public final class ASTLower implements NodeVisitor<Pair> {
 
   @Override
   public Pair visit(Return ret) {
-    Pair retPair = ret.accept(this);
+    Pair retPair = ret.getValue().accept(this);
     ReturnInst retInst = new ReturnInst((LocalVar) retPair.getVal());
+    retPair.getEnd().setNext(0, retInst);
 
-    return new Pair(retInst, retInst, retPair.getVal());
+    return new Pair(retPair.getStart(), retInst, retPair.getVal());
   }
 
   /**
