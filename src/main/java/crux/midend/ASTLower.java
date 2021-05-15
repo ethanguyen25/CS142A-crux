@@ -375,7 +375,9 @@ public final class ASTLower implements NodeVisitor<Pair> {
   }
 
   private Pair visit(Expression expression) {
-    expression.getClass().getName();
+    for (var e: expression.getChildren()){
+      e.accept(this);
+    }
 
     return null;
   }
@@ -478,6 +480,8 @@ public final class ASTLower implements NodeVisitor<Pair> {
     if (falseBlock.getStart() != null && falseBlock.getEnd() != null && falseBlock.getVal() != null){
       jInst.setNext(0, falseBlock.getStart());
       falseBlock.getEnd().setNext(0, endNop);
+    } else {
+      jInst.setNext(0, endNop);
     }
 
 
