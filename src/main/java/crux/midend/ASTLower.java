@@ -62,6 +62,9 @@ public final class ASTLower implements NodeVisitor<Pair> {
 //  public Instruction mLastInstruction;
 //  public Value mCurrentValue;
 
+  public Instruction brkInstruction = null;
+  public Instruction contInstruction = null;
+
 
   /**
    * A constructor to initialize member variables
@@ -123,8 +126,24 @@ public final class ASTLower implements NodeVisitor<Pair> {
   public Pair visit(StatementList statementList) {
     Instruction firstInst = null;
     Instruction lastInst = null;
+    Instruction loopInst = null;
     for (var e: statementList.getChildren()){
       Pair statement = e.accept(this);
+      if (statement.getStart().getClass() == NopInst.class && statement.getEnd().getClass() == NopInst.class && statement.getVal() == null) {
+        brkInstruction = statement.getStart();
+      }
+      if (loopInst != null) {
+        brkInstruction.setNext(0, statement.getStart());
+      }
+      //PLANNED ON CHECKING FOR CONTINUE STATEMENT (HOW IS IT DIFFERENT THAN BREAK
+//      if (statement.getStart().getClass() == null && statement.getEnd().getClass() == null && statement.getVal() == null) {
+//        contInstruction = statement.getStart();
+//      }
+      //IF A LOOP PAIR RETURNED, THAN START = END (?)
+      //  THEN, NEXT CHECK IF loopInst != null, IF CONTINUE PAIR AND SET NEXT OF CONTINUE PAIR TO LOOP.GETSTART()
+//      if (statement.getStart() == statement.getEnd().getNext(0)){
+//        loopInst = statement.getStart();
+//      }
       if (firstInst == null){
           firstInst = statement.getStart();
       } else {
@@ -445,7 +464,11 @@ public final class ASTLower implements NodeVisitor<Pair> {
 
   @Override
   public Pair visit(Break brk) {
-    return null;
+    //Point to the first instruction after the loop
+
+    NopInst nop = new NopInst();
+
+    return new Pair(nop, nop, null);
   }
 
   /**
@@ -454,7 +477,10 @@ public final class ASTLower implements NodeVisitor<Pair> {
 
   @Override
   public Pair visit(Continue cnt) {
-    return null;
+    //Point back to the start of the loop
+
+    NopInst nop = new NopInst();
+    return new Pair(nop, nop, null);
   }
 
   /**
@@ -474,10 +500,17 @@ public final class ASTLower implements NodeVisitor<Pair> {
 
     Pair trueBlock = ifElseBranch.getThenBlock().accept(this);
     jInst.setNext(1, trueBlock.getStart());
-    trueBlock.getEnd().setNext(0, endNop);
+
+    //MIGHT NOT HAVE TO CHECK FOR BREAK HERE
+    if (trueBlock.getStart().getClass() != NopInst.class || trueBlock.getEnd().getClass() != NopInst.class || trueBlock.getVal() != null) {
+      trueBlock.getEnd().setNext(0, endNop);
+    } else {
+      trueBlock.getEnd().setNext(0, new NopInst());
+    }
+
 
     Pair falseBlock = ifElseBranch.getElseBlock().accept(this);
-    if (falseBlock.getStart() != null && falseBlock.getEnd() != null && falseBlock.getVal() != null){
+    if (falseBlock.getStart() != null && falseBlock.getEnd() != null) {   // && falseBlock.getVal() != null){
       jInst.setNext(0, falseBlock.getStart());
       falseBlock.getEnd().setNext(0, endNop);
     } else {
@@ -496,7 +529,22 @@ public final class ASTLower implements NodeVisitor<Pair> {
   public Pair visit(Loop loop) {
     //see break, exit to join block
 
-    return null;
+    NopInst loopStart = new NopInst(); //This represents the start of the loop (?)
+    Instruction afterStart = null;
+    Instruction lastInst = null;
+
+    for (var e: loop.getBody().getChildren()) {
+      Pair loopPairs = e.accept(this);
+      if (afterStart == null){
+        afterStart = loopPairs.getStart();
+      } else {
+        lastInst.setNext(0, loopPairs.getStart());
+      }
+      lastInst = loopPairs.getEnd();
+    }
+    loopStart.setNext(0,afterStart);
+    lastInst.setNext(0,loopStart);
+    return new Pair(loopStart, lastInst, null);
   }
 }
 
