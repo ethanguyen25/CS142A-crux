@@ -62,8 +62,13 @@ public final class ASTLower implements NodeVisitor<Pair> {
 //  public Instruction mLastInstruction;
 //  public Value mCurrentValue;
 
-  public Instruction brkInstruction = null;
-  public Instruction contInstruction = null;
+//  public Instruction brkInstruction = null;
+//  public Instruction contInstruction = null;
+//  public Instruction loopInstruction = null;
+
+  public Pair brkInstruction = null;
+  public Pair contInstruction = null;
+  public Pair loopInstruction = null;
 
 
   /**
@@ -126,30 +131,36 @@ public final class ASTLower implements NodeVisitor<Pair> {
   public Pair visit(StatementList statementList) {
     Instruction firstInst = null;
     Instruction lastInst = null;
-    Instruction loopInst = null;
+    Instruction brkStart = null;
+    Instruction brkEnd = null;
+    int counter = 0;
+
     for (var e: statementList.getChildren()){
       Pair statement = e.accept(this);
-      if (statement.getStart().getClass() == NopInst.class && statement.getEnd().getClass() == NopInst.class && statement.getVal() == null) {
-        brkInstruction = statement.getStart();
-      }
-      if (loopInst != null) {
-        brkInstruction.setNext(0, statement.getStart());
-      }
-      //PLANNED ON CHECKING FOR CONTINUE STATEMENT (HOW IS IT DIFFERENT THAN BREAK
-//      if (statement.getStart().getClass() == null && statement.getEnd().getClass() == null && statement.getVal() == null) {
-//        contInstruction = statement.getStart();
-//      }
-      //IF A LOOP PAIR RETURNED, THAN START = END (?)
-      //  THEN, NEXT CHECK IF loopInst != null, IF CONTINUE PAIR AND SET NEXT OF CONTINUE PAIR TO LOOP.GETSTART()
-//      if (statement.getStart() == statement.getEnd().getNext(0)){
-//        loopInst = statement.getStart();
-//      }
       if (firstInst == null){
-          firstInst = statement.getStart();
-      } else {
+        firstInst = statement.getStart();
+      } else if (counter == 0){
         lastInst.setNext(0, statement.getStart());
+        if (loopInstruction != null) {
+          lastInst.setNext(0, statement.getStart());
+          ++counter;
+        }
+      } else if (counter == 1 && brkInstruction != null){
+        if (brkStart == null) {
+          brkStart = statement.getStart();
+        } else {
+          brkEnd.setNext(0, statement.getStart());
+        }
+        brkEnd = statement.getEnd();
+//        brkInstruction.getEnd().setNext(0, statement.getStart());
       }
       lastInst = statement.getEnd();
+
+    }
+
+    Pair temp = new Pair(brkStart, brkEnd, null);
+    if (brkInstruction != null){
+      brkInstruction.getEnd().setNext(0, temp.getStart());
     }
 
     return new Pair(firstInst, lastInst, null);
@@ -323,7 +334,13 @@ public final class ASTLower implements NodeVisitor<Pair> {
         return new Pair(left.getStart(), ltInst , tempVar);
         //break;
       case ADD:
-        BinaryOperator addBO = new BinaryOperator(BinaryOperator.Op.Add, tempVar, (LocalVar) left.getVal(), (LocalVar) right.getVal());
+        BinaryOperator addBO = null;
+        if (left.getEnd().getClass() == CallInst.class && right.getEnd().getClass() == CallInst.class){
+//          ((CallInst) left.getEnd()).getDst()
+          addBO = new BinaryOperator(BinaryOperator.Op.Add, tempVar, ((CallInst) left.getEnd()).getDst(), ((CallInst) right.getEnd()).getDst());
+        } else {
+          addBO = new BinaryOperator(BinaryOperator.Op.Add, tempVar, (LocalVar) left.getVal(), (LocalVar) right.getVal());
+        }
         right.getEnd().setNext(0, addBO);
         return new Pair(left.getStart(), addBO, tempVar);
         //break;
@@ -467,8 +484,9 @@ public final class ASTLower implements NodeVisitor<Pair> {
     //Point to the first instruction after the loop
 
     NopInst nop = new NopInst();
+    brkInstruction = new Pair (nop, nop, null);
 
-    return new Pair(nop, nop, null);
+    return brkInstruction;
   }
 
   /**
@@ -480,7 +498,9 @@ public final class ASTLower implements NodeVisitor<Pair> {
     //Point back to the start of the loop
 
     NopInst nop = new NopInst();
-    return new Pair(nop, nop, null);
+    contInstruction = new Pair(nop, nop, null);
+
+    return contInstruction;
   }
 
   /**
@@ -502,7 +522,7 @@ public final class ASTLower implements NodeVisitor<Pair> {
     jInst.setNext(1, trueBlock.getStart());
 
     //MIGHT NOT HAVE TO CHECK FOR BREAK HERE
-    if (trueBlock.getStart().getClass() != NopInst.class || trueBlock.getEnd().getClass() != NopInst.class || trueBlock.getVal() != null) {
+    if (brkInstruction == null) {//if (trueBlock.getStart().getClass() != NopInst.class || trueBlock.getEnd().getClass() != NopInst.class || trueBlock.getVal() != null) {
       trueBlock.getEnd().setNext(0, endNop);
     } else {
       trueBlock.getEnd().setNext(0, new NopInst());
@@ -541,11 +561,25 @@ public final class ASTLower implements NodeVisitor<Pair> {
         lastInst.setNext(0, loopPairs.getStart());
       }
       lastInst = loopPairs.getEnd();
+//      lastInst.setNext(0, loopStart);
     }
     loopStart.setNext(0,afterStart);
-    lastInst.setNext(0,loopStart);
-    return new Pair(loopStart, lastInst, null);
+//    lastInst.setNext(0,loopStart);
+
+    Pair tempPair = new Pair(loopStart, lastInst, null);
+    tempPair.getEnd().setNext(0, tempPair.getStart());
+
+//    loopInstruction = new Pair(loopStart, loopStart, null);
+
+    loopInstruction = tempPair;
+    return loopInstruction;
   }
 }
 
+
+/**
+ * After visiting loop, it goes back to statementList
+ *    Should we handle loop pointing back to start in loop or statementList
+ * If loopInstruction != null, then connect the loop Pair with the previous instructions and make the end point to loop start
+ */
 
