@@ -266,22 +266,32 @@ public final class ASTLower implements NodeVisitor<Pair> {
   public Pair visit(Call call) {
     List<LocalVar> list = new ArrayList<>();
     Pair previousInst = null;
+    Instruction tempStart = null;
+    Instruction tempEnd = null;
+
     for (var e: call.getArguments()){
       previousInst = e.accept(this);
       list.add((LocalVar) previousInst.getVal());
+      if (tempStart == null) {
+        tempStart = previousInst.getStart();
+      } else {
+        tempEnd.setNext(0, previousInst.getStart());
+      }
+      tempEnd = previousInst.getEnd();
     }
+    Pair tempPair = new Pair(tempStart, tempEnd, null);
 
     Symbol calleeAddr = call.getCallee();
     Type calleeType = calleeAddr.getType();  //Why cast to FuncType ???
 
     LocalVar retType = mCurrentFunction.getTempVar(((FuncType) calleeType).getRet());
-//    for (mCurrentProgram.getFunctions())
     CallInst callInst = new CallInst(retType, calleeAddr, list);
 
 
     if (previousInst != null){
-      previousInst.getEnd().setNext(0,callInst);
-      return new Pair(previousInst.getStart(), callInst, previousInst.getVal());
+      tempPair.getEnd().setNext(0, callInst);
+      return new Pair(tempPair.getStart(), callInst, retType);
+
     }
 
 //    LocalVar temp = mCurrentFunction.getTempVar(((FuncType) calleeType).getRet());
@@ -334,9 +344,8 @@ public final class ASTLower implements NodeVisitor<Pair> {
         return new Pair(left.getStart(), ltInst , tempVar);
         //break;
       case ADD:
-        BinaryOperator addBO = null;
+        BinaryOperator addBO;
         if (left.getEnd().getClass() == CallInst.class && right.getEnd().getClass() == CallInst.class){
-//          ((CallInst) left.getEnd()).getDst()
           addBO = new BinaryOperator(BinaryOperator.Op.Add, tempVar, ((CallInst) left.getEnd()).getDst(), ((CallInst) right.getEnd()).getDst());
         } else {
           addBO = new BinaryOperator(BinaryOperator.Op.Add, tempVar, (LocalVar) left.getVal(), (LocalVar) right.getVal());
@@ -378,7 +387,7 @@ public final class ASTLower implements NodeVisitor<Pair> {
       LocalVar destTemp = mCurrentFunction.getTempVar(addr.getVal().getType());
       CopyInst copyInst = new CopyInst(destTemp, addr.getVal());
       addr.getEnd().setNext(0, copyInst);
-      return new Pair(addr.getStart(), copyInst, addr.getVal());
+      return new Pair(addr.getStart(), copyInst, destTemp);
     } else {
       Value val = addr.getVal();
       if (dereference.getAddress() instanceof Name) {
