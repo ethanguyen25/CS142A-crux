@@ -305,13 +305,15 @@ public final class ASTLower implements NodeVisitor<Pair> {
 
   @Override
   public Pair visit(OpExpr operation) {
-    Pair left = operation.getLeft().accept(this);
-    Pair right = operation.getRight().accept(this);
-    left.getEnd().setNext(0, right.getStart());
+    Pair left = null;
+    Pair right = null;
+    if (operation.getOp() != Operation.LOGIC_AND && operation.getOp() != Operation.LOGIC_OR) {
+      left = operation.getLeft().accept(this);
+      right = operation.getRight().accept(this);
+      left.getEnd().setNext(0, right.getStart());
+    }
 
     LocalVar tempVar = mCurrentFunction.getTempVar(checker.getType(operation));
-//    LocalVar lhs = mCurrentFunction.getTempVar(left.getVal().getType());
-//    LocalVar rhs = mCurrentFunction.getTempVar(right.getVal().getType());
     switch (operation.getOp()){
       case GE:
         CompareInst geInst = new CompareInst(tempVar, CompareInst.Predicate.GE, (LocalVar)left.getVal(), (LocalVar) right.getVal());
@@ -369,14 +371,54 @@ public final class ASTLower implements NodeVisitor<Pair> {
         return new Pair(left.getStart(), divBO, tempVar);
         //break;
       case LOGIC_AND:
-        //break;
       case LOGIC_OR:
-        //break;
+        return handleLOGICAL(operation);
+      //break;
       case LOGIC_NOT:
+//        UnaryNotInst lNot = new UnaryNotInst(tempVar, )
         //break;
     }
     return null;
   }
+
+  public Pair handleLOGICAL(OpExpr logicalOperator) {
+    Pair lhs = logicalOperator.getLeft().accept(this);
+    CopyInst copyInst = new CopyInst(mCurrentFunction.getTempVar(new BoolType()), lhs.getVal());
+    lhs.getEnd().setNext(0, copyInst);
+
+    JumpInst jInst = new JumpInst(copyInst.getDstVar());
+    copyInst.setNext(0, jInst);
+
+    NopInst endNop = new NopInst();
+
+    if (logicalOperator.getOp() == Operation.LOGIC_AND){
+      //If TRUE check rhs
+      Pair rhs = logicalOperator.getRight().accept(this);
+      jInst.setNext(1, rhs.getStart());
+      CopyInst assign = new CopyInst(copyInst.getDstVar(), rhs.getVal());
+      rhs.getEnd().setNext(0, assign);
+      assign.setNext(0, endNop);
+      //if FALSE then end
+      jInst.setNext(0, endNop);
+
+      return new Pair(lhs.getStart(), endNop, copyInst.getDstVar());
+    } else {
+      //If FALSE check rhs
+      Pair rhs = logicalOperator.getRight().accept(this);
+      jInst.setNext(0, rhs.getStart());
+      CopyInst assign = new CopyInst(copyInst.getDstVar(), rhs.getVal());
+      rhs.getEnd().setNext(0, assign);
+      assign.setNext(0, endNop);
+      //if TRUE then end
+      jInst.setNext(1, endNop);
+
+      return new Pair(lhs.getStart(), endNop, copyInst.getDstVar());
+    }
+
+  }
+
+
+
 
   @Override
   public Pair visit(Dereference dereference) {
