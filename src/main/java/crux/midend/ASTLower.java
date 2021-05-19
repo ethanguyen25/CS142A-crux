@@ -169,13 +169,13 @@ public final class ASTLower implements NodeVisitor<Pair> {
       }
 
       //Second Loop
-      if (counter == 1 && !loopStack.empty()) {
-        Pair recentLoop = loopStack.pop();
-        lastInst.setNext(0, recentLoop.getStart());
-        ++counter;
-      } else if (counter == 2 && !breakStack.empty()){
-        bstackPair2 = breakStack.pop();
-      }
+//      if (counter == 1 && !loopStack.empty()) {
+//        Pair recentLoop = loopStack.pop();
+//        lastInst.setNext(0, recentLoop.getStart());
+//        ++counter;
+//      } else if (counter == 2 && !breakStack.empty()){
+//        bstackPair2 = breakStack.pop();
+//      }
 
       if (bstackPair2 != null && counter == 2) {
         if (brkStart2 == null) {
@@ -189,6 +189,13 @@ public final class ASTLower implements NodeVisitor<Pair> {
 
       lastInst = statement.getEnd();
 
+    }
+
+    if (counter == 1 && !breakStack.empty() && brkStart == null){
+      //if we just connected to a loop statement and no statement comes after, meaning break will not be set, set break to nop (Do here instead of ifElse ?)
+      bstackPair = breakStack.pop();
+      brkStart = new NopInst();
+      brkEnd = brkStart;
     }
 
     Pair temp = new Pair(brkStart, brkEnd, null);
