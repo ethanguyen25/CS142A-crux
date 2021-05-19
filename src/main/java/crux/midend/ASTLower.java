@@ -15,6 +15,10 @@ import java.util.Map;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+//ADDED
+import java.io.*;
+import java.util.*;
+
 /**
  * Convert AST to IR and build the CFG.
  */
@@ -58,17 +62,14 @@ public final class ASTLower implements NodeVisitor<Pair> {
   private Map<Symbol, Variable> mCurrentLocalVarMap = null;
   private TypeChecker checker;
 
-//  //ADDED
-//  public Instruction mLastInstruction;
-//  public Value mCurrentValue;
-
-//  public Instruction brkInstruction = null;
-//  public Instruction contInstruction = null;
-//  public Instruction loopInstruction = null;
-
+  //ADDED
   public Pair brkInstruction = null;
   public Pair contInstruction = null;
   public Pair loopInstruction = null;
+  public Pair prevEnd = null;
+
+  public Stack<Pair> loopStack = new Stack<>();
+  public Stack<Pair> breakStack = new Stack<>();
 
 
   /**
@@ -133,35 +134,73 @@ public final class ASTLower implements NodeVisitor<Pair> {
     Instruction lastInst = null;
     Instruction brkStart = null;
     Instruction brkEnd = null;
+    Pair bstackPair = null;
     int counter = 0;
+
+    Pair bstackPair2 = null;
+    Instruction brkStart2 = null;
+    Instruction brkEnd2 = null;
 
     for (var e: statementList.getChildren()){
       Pair statement = e.accept(this);
+
+
+
       if (firstInst == null){
         firstInst = statement.getStart();
       } else if (counter == 0){
         lastInst.setNext(0, statement.getStart());
-        if (loopInstruction != null) {
-          lastInst.setNext(0, statement.getStart());
+        if (!loopStack.empty()) {
+          Pair recentLoop = loopStack.pop();
+          lastInst.setNext(0, recentLoop.getStart());
           ++counter;
         }
-      } else if (counter == 1 && brkInstruction != null){
+      } else if (counter == 1 && !breakStack.empty() && brkStart == null){
+        bstackPair = breakStack.pop();
+      }
+
+      if (bstackPair != null && counter == 1) {
         if (brkStart == null) {
           brkStart = statement.getStart();
         } else {
           brkEnd.setNext(0, statement.getStart());
         }
         brkEnd = statement.getEnd();
-//        brkInstruction.getEnd().setNext(0, statement.getStart());
       }
+
+      //Second Loop
+      if (counter == 1 && !loopStack.empty()) {
+        Pair recentLoop = loopStack.pop();
+        lastInst.setNext(0, recentLoop.getStart());
+        ++counter;
+      } else if (counter == 2 && !breakStack.empty()){
+        bstackPair2 = breakStack.pop();
+      }
+
+      if (bstackPair2 != null && counter == 2) {
+        if (brkStart2 == null) {
+          brkStart2 = statement.getStart();
+        } else {
+          brkEnd2.setNext(0, statement.getStart());
+        }
+        brkEnd2 = statement.getEnd();
+      }
+
+
       lastInst = statement.getEnd();
 
     }
 
     Pair temp = new Pair(brkStart, brkEnd, null);
-    if (brkInstruction != null){
-      brkInstruction.getEnd().setNext(0, temp.getStart());
+    if (bstackPair != null){
+      bstackPair.getEnd().setNext(0, temp.getStart());
     }
+
+    Pair temp2 = new Pair(brkStart2, brkEnd2, null);
+    if (bstackPair2 != null){
+      bstackPair2.getEnd().setNext(0, temp2.getStart());
+    }
+
 
     return new Pair(firstInst, lastInst, null);
   }
@@ -307,7 +346,7 @@ public final class ASTLower implements NodeVisitor<Pair> {
   public Pair visit(OpExpr operation) {
     Pair left = null;
     Pair right = null;
-    if (operation.getOp() != Operation.LOGIC_AND && operation.getOp() != Operation.LOGIC_OR) {
+    if (operation.getOp() != Operation.LOGIC_AND && operation.getOp() != Operation.LOGIC_OR && operation.getOp() != Operation.LOGIC_NOT) {
       left = operation.getLeft().accept(this);
       right = operation.getRight().accept(this);
       left.getEnd().setNext(0, right.getStart());
@@ -375,7 +414,10 @@ public final class ASTLower implements NodeVisitor<Pair> {
         return handleLOGICAL(operation);
       //break;
       case LOGIC_NOT:
-//        UnaryNotInst lNot = new UnaryNotInst(tempVar, )
+        Pair lhs = operation.getLeft().accept(this);
+        UnaryNotInst lNot = new UnaryNotInst(tempVar, (LocalVar) lhs.getVal());
+        lhs.getEnd().setNext(0, lNot);
+        return new Pair(lhs.getStart(), lNot, tempVar);
         //break;
     }
     return null;
@@ -535,9 +577,13 @@ public final class ASTLower implements NodeVisitor<Pair> {
     //Point to the first instruction after the loop
 
     NopInst nop = new NopInst();
-    brkInstruction = new Pair (nop, nop, null);
+    Pair brkPair = new Pair(nop, nop, null);
+    breakStack.push(brkPair);
+    brkInstruction = brkPair;
+    return brkPair;
 
-    return brkInstruction;
+//    brkInstruction = new Pair (nop, nop, null);
+//    return brkInstruction;
   }
 
   /**
@@ -568,23 +614,44 @@ public final class ASTLower implements NodeVisitor<Pair> {
     condPair.getEnd().setNext(0, jInst);
 
     NopInst endNop = new NopInst();
+    int brkCount = breakStack.size(); //After visiting the trueBlock, check if the count of the breakStack went up, meaning that we visited a break
 
     Pair trueBlock = ifElseBranch.getThenBlock().accept(this);
     jInst.setNext(1, trueBlock.getStart());
 
     //MIGHT NOT HAVE TO CHECK FOR BREAK HERE
-    if (brkInstruction == null) {//if (trueBlock.getStart().getClass() != NopInst.class || trueBlock.getEnd().getClass() != NopInst.class || trueBlock.getVal() != null) {
-      trueBlock.getEnd().setNext(0, endNop);
-    } else {
-      trueBlock.getEnd().setNext(0, new NopInst());
-    }
+    if (breakStack.empty()) {//if (trueBlock.getStart().getClass() != NopInst.class || trueBlock.getEnd().getClass() != NopInst.class || trueBlock.getVal() != null) {
+      trueBlock.getEnd().setNext(0, endNop); }
+//    } else if (breakStack.size() > brkCount) {
+//      trueBlock.getEnd().setNext(0, new NopInst());
+//    }
 
 
     Pair falseBlock = ifElseBranch.getElseBlock().accept(this);
     if (falseBlock.getStart() != null && falseBlock.getEnd() != null) {   // && falseBlock.getVal() != null){
       jInst.setNext(0, falseBlock.getStart());
       falseBlock.getEnd().setNext(0, endNop);
+
+      //if elseBlock exists then join them;
+      trueBlock.getEnd().setNext(0, endNop);
+
+      //Check if loopStack and breakStack are not empty, if not empty, then it means there was a loop and break in trueBlock
+      if (!breakStack.empty()) {
+        Pair brkPair = breakStack.pop();
+        brkPair.getEnd().setNext(0, endNop);
+        prevEnd = brkPair;
+      }
+
+      if (!loopStack.empty()){
+        Pair loopPair = loopStack.pop();
+        loopPair.getEnd().setNext(0, loopPair.getStart());
+      }
+
     } else {
+      if (prevEnd != null) {
+        trueBlock.getEnd().setNext(0, endNop);
+      }
+//      trueBlock.getEnd().setNext(0, endNop);
       jInst.setNext(0, endNop);
     }
 
@@ -603,27 +670,63 @@ public final class ASTLower implements NodeVisitor<Pair> {
     NopInst loopStart = new NopInst(); //This represents the start of the loop (?)
     Instruction afterStart = null;
     Instruction lastInst = null;
+    Instruction brkStart = null;
+    Instruction brkEnd = null;
+    Pair bstackPair = null;
+
+    int counter = 0;
 
     for (var e: loop.getBody().getChildren()) {
       Pair loopPairs = e.accept(this);
       if (afterStart == null){
         afterStart = loopPairs.getStart();
-      } else {
+      } else if (counter == 0){
         lastInst.setNext(0, loopPairs.getStart());
+        if (!loopStack.empty()){
+          Pair lstackPair = loopStack.pop();
+          lastInst.setNext(0, lstackPair.getStart());
+          ++counter;
+        }
+      } else if (counter > 0 && !breakStack.empty() && brkStart == null) {
+        bstackPair = breakStack.pop();
       }
+
+      if (bstackPair != null) {
+        if (brkStart == null) {
+          brkStart = loopPairs.getStart();
+        } else {
+          brkEnd.setNext(0, loopPairs.getStart());
+        }
+        brkEnd = loopPairs.getEnd();
+      }
+
       lastInst = loopPairs.getEnd();
-//      lastInst.setNext(0, loopStart);
+
     }
     loopStart.setNext(0,afterStart);
-//    lastInst.setNext(0,loopStart);
+
+    if (counter == 1 && !breakStack.empty() && brkStart == null){
+      //if we just connected to a loop statement and no statement comes after, meaning break will not be set, set break to nop (Do here instead of ifElse ?)
+      bstackPair = breakStack.pop();
+      brkStart = new NopInst();
+      brkEnd = brkStart;
+    }
+
+    Pair temp = new Pair(brkStart, brkEnd, null);
+    if (bstackPair != null){
+      bstackPair.getEnd().setNext(0, temp.getStart());
+    }
+
 
     Pair tempPair = new Pair(loopStart, lastInst, null);
     tempPair.getEnd().setNext(0, tempPair.getStart());
+//    loopInstruction = tempPair;
+//    return loopInstruction;
 
-//    loopInstruction = new Pair(loopStart, loopStart, null);
+    loopStack.push(tempPair);
+    return tempPair;
 
-    loopInstruction = tempPair;
-    return loopInstruction;
+
   }
 }
 
