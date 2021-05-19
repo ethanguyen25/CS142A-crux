@@ -168,14 +168,14 @@ public final class ASTLower implements NodeVisitor<Pair> {
         brkEnd = statement.getEnd();
       }
 
-      //Second Loop
-//      if (counter == 1 && !loopStack.empty()) {
-//        Pair recentLoop = loopStack.pop();
-//        lastInst.setNext(0, recentLoop.getStart());
-//        ++counter;
-//      } else if (counter == 2 && !breakStack.empty()){
-//        bstackPair2 = breakStack.pop();
-//      }
+//      Second Loop
+      if (counter == 1 && !loopStack.empty()) {
+        Pair recentLoop = loopStack.pop();
+        lastInst.setNext(0, recentLoop.getStart());
+        ++counter;
+      } else if (counter == 2 && !breakStack.empty()){
+        bstackPair2 = breakStack.pop();
+      }
 
       if (bstackPair2 != null && counter == 2) {
         if (brkStart2 == null) {
@@ -196,6 +196,7 @@ public final class ASTLower implements NodeVisitor<Pair> {
       bstackPair = breakStack.pop();
       brkStart = new NopInst();
       brkEnd = brkStart;
+      lastInst = brkEnd;
     }
 
     Pair temp = new Pair(brkStart, brkEnd, null);
@@ -643,7 +644,7 @@ public final class ASTLower implements NodeVisitor<Pair> {
       trueBlock.getEnd().setNext(0, endNop);
 
       //Check if loopStack and breakStack are not empty, if not empty, then it means there was a loop and break in trueBlock
-      if (!breakStack.empty()) {
+      if (!breakStack.empty() && (breakStack.size() > brkCount)) {
         Pair brkPair = breakStack.pop();
         brkPair.getEnd().setNext(0, endNop);
         prevEnd = brkPair;
@@ -656,6 +657,8 @@ public final class ASTLower implements NodeVisitor<Pair> {
 
     } else {
       if (prevEnd != null) {
+        trueBlock.getEnd().setNext(0, endNop);
+      } else if (breakStack.size() == brkCount) {
         trueBlock.getEnd().setNext(0, endNop);
       }
 //      trueBlock.getEnd().setNext(0, endNop);
@@ -717,6 +720,7 @@ public final class ASTLower implements NodeVisitor<Pair> {
       bstackPair = breakStack.pop();
       brkStart = new NopInst();
       brkEnd = brkStart;
+      lastInst = brkEnd;
     }
 
     Pair temp = new Pair(brkStart, brkEnd, null);
