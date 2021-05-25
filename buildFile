@@ -1,0 +1,21 @@
+#!/bin/bash
+
+#case="test01"
+read case
+
+echo "Compiling Maven "
+mvn compile exec:java -Dexec.args="src/test/resources/crux/stages/codegen/${case}.crx"
+
+
+echo "Generate object file"
+gcc -c -g "a.s"  -o "${case}.o"
+
+
+echo "generate runtime"
+gcc -c -g src/runtime/runtime.c -o runtime.o
+
+echo "Link"
+gcc "${case}.o" runtime.o -o "${case}"
+
+echo "run"
+./${case}

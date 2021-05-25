@@ -12,9 +12,9 @@ void main() {
     if (true) {
       if (true) {
         loop {
-	  if (b >= 3) {
-	     break;
-	  }
+          if (b >= 3) {
+             break;
+          }
           printInt(5);
           b = b + 1;
         }

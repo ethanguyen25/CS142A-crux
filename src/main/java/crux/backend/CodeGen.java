@@ -16,6 +16,7 @@ public final class CodeGen extends InstVisitor {
   private final Program p;
   private final CodePrinter out;
 
+
   public CodeGen(Program p) {
     this.p = p;
     // Do not change the file name that is outputted or it will
@@ -29,16 +30,60 @@ public final class CodeGen extends InstVisitor {
    */
   public void genCode() {
     // This function should generate code the entire program
+    for (Iterator<GlobalDecl> globIt = p.getGlobals(); globIt.hasNext();) {
+      GlobalDecl g = globIt.next();
+//      out.printCode(".comm " + name + ", " + size + ", 8");
+    }
+
+    for (Iterator<Function> functIt = p.getFunctions(); functIt.hasNext();) {
+      Function f = functIt.next();
+      genCode(f);
+    }
+
     out.close();
   }
 
   private int labelcount = 1;
 
+  // ADDED //////////
+  private int stackCount = 0;
+  HashMap<Variable, Integer> varMap = new HashMap<Variable, Integer>();
+
+  Integer getStackSlots(Variable v) {
+    if (!varMap.containsKey(v)) {
+      stackCount++;
+      varMap.put(v, stackCount);
+    }
+
+    return varMap.get(v);
+  }
+  // ADDED END /////////
+
+
   private String getNewLabel() {
     return "L" + (labelcount++);
   }
 
-  private void genCode(Function f) {}
+  private void genCode(Function f) {
+    Instruction inst = f.getStart();
+    while (inst != null){
+      inst.accept(this);
+      inst = inst.getNext(0);
+    }
+
+    if (f.getName().equals("main")) {
+      out.printCode(".globl _" + f.getName());
+    }
+
+    out.printCode("_" + f.getName() + ":");
+    int numSlots = stackCount;
+    numSlots = (numSlots + 1) &  ~1;
+    out.printCode("enter $(8 * " + numSlots + "), $0");
+    out.outputBuffer(); // ??
+    out.close();
+
+
+  }
 
   /**
    * Assigns Labels to any Instruction that might be the target of a conditional or unconditional
@@ -78,15 +123,26 @@ public final class CodeGen extends InstVisitor {
 
   public void visit(BinaryOperator i) {}
 
-  public void visit(CompareInst i) {}
+  public void visit(CompareInst i) {
+  }
 
-  public void visit(CopyInst i) {}
+  public void visit(CopyInst i) {
+    LocalVar dst = i.getDstVar();
+    Value val = i.getSrcValue();
+    out.bufferCode("// " + dst + " = " + val);
+    int slotNum = getStackSlots(dst);
+    int offset = -8 * slotNum;
+    out.bufferCode("movq $" + val + ", %r10");
+    out.bufferCode("movq %r10, " + offset + "(%rbp)");
+  }
 
   public void visit(JumpInst i) {}
 
   public void visit(LoadInst i) {}
 
-  public void visit(NopInst i) {}
+  public void visit(NopInst i) {
+    out.bufferCode("// NOP");
+  }
 
   public void visit(StoreInst i) {}
 
