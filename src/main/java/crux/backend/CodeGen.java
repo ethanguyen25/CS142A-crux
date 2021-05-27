@@ -1,6 +1,7 @@
 package crux.backend;
 
 import crux.frontend.Symbol;
+import crux.frontend.types.IntType;
 import crux.midend.ir.core.*;
 import crux.midend.ir.core.insts.*;
 import crux.printing.IRValueFormatter;
@@ -32,7 +33,8 @@ public final class CodeGen extends InstVisitor {
     // This function should generate code the entire program
     for (Iterator<GlobalDecl> globIt = p.getGlobals(); globIt.hasNext();) {
       GlobalDecl g = globIt.next();
-//      out.printCode(".comm " + name + ", " + size + ", 8");
+      long size = ((IntegerConstant) g.getNumElement()).getValue();
+      out.printCode(".comm " + g.getSymbol().getName() + ", " + (size * 8) + ", 8");
     }
 
     for (Iterator<Function> functIt = p.getFunctions(); functIt.hasNext();) {
@@ -40,12 +42,21 @@ public final class CodeGen extends InstVisitor {
       genCode(f);
     }
 
+    out.outputBuffer();
+    out.printCode("movq $0, %rax");
+    out.printCode("leave");
+    out.printCode("ret");
+
     out.close();
   }
 
   private int labelcount = 1;
 
   // ADDED //////////
+
+  //argRegisters is a global array that holds the 6 registers for arguments
+  String[] argRegisters = new String[]{"%rdi","%rsi","%rdx","%rcx","%r8","%r9"};
+
   private int stackCount = 0;
   HashMap<Variable, Integer> varMap = new HashMap<Variable, Integer>();
 
@@ -75,13 +86,10 @@ public final class CodeGen extends InstVisitor {
       out.printCode(".globl _" + f.getName());
     }
 
-    out.printCode("_" + f.getName() + ":");
+    out.printLabel("_" + f.getName() + ":");
     int numSlots = stackCount;
     numSlots = (numSlots + 1) &  ~1;
     out.printCode("enter $(8 * " + numSlots + "), $0");
-    out.outputBuffer(); // ??
-    out.close();
-
 
   }
 
@@ -119,20 +127,81 @@ public final class CodeGen extends InstVisitor {
     return labelMap;
   }
 
-  public void visit(AddressAt i) {}
+  public void visit(AddressAt i) {
+    out.bufferCode("/*** AddressAt ***/");
+    AddressVar dst = i.getDst();
+    Symbol base = i.getBase();
+    LocalVar offset = i.getOffset();
 
-  public void visit(BinaryOperator i) {}
+//    int dstOffset = getStackSlots(dst);
+
+
+  }
+
+  public void visit(BinaryOperator i) {
+    out.bufferCode("/*** BinaryOperator ***/");
+    LocalVar lhs = i.getLeftOperand();
+    LocalVar rhs = i.getRightOperand();
+    LocalVar dst = i.getDst();
+
+    int dstSlot = getStackSlots(dst);
+    int lhsSlot = getStackSlots(lhs);
+    int rhsSlot = getStackSlots(rhs);
+
+    int dstOffset = -8 * dstSlot;
+    int lhsOffset = -8 * lhsSlot;
+    int rhsOffset = -8 * rhsSlot;
+
+    switch(i.getOperator()) {
+      case Add:
+        out.bufferCode("movq " + lhsOffset + "(%rbp), %r10");
+        out.bufferCode("addq " + rhsOffset + "(%rbp), %r10");
+        out.bufferCode("movq %r10, " + dstOffset + "(%rbp)");
+        break;
+      case Sub:
+        out.bufferCode("movq " + lhsOffset + "(%rbp), %r10");
+        out.bufferCode("subq " + rhsOffset + "(%rbp), %r10");
+        out.bufferCode("movq %r10, " + dstOffset + "(%rbp)");
+        break;
+      case Mul:
+        out.bufferCode("movq " + lhsOffset + "(%rbp), %r10");
+        out.bufferCode("imulq " + rhsOffset + "(%rbp), %r10");
+        out.bufferCode("movq %r10, " + dstOffset + "(%rbp)");
+        break;
+      case Div:
+        out.bufferCode("movq " + lhsOffset + "(%rbp), %rax");
+        out.bufferCode("cqto");
+        out.bufferCode("idivq " + rhsOffset + "(%rbp)");
+        out.bufferCode("movq %rax, "+ dstOffset+"(%rbp)");
+        break;
+    }
+
+  }
 
   public void visit(CompareInst i) {
   }
 
   public void visit(CopyInst i) {
+    out.bufferCode("/*** CopyInst ***/");
     LocalVar dst = i.getDstVar();
     Value val = i.getSrcValue();
-    out.bufferCode("// " + dst + " = " + val);
+    //out.bufferCode("// " + dst + " = " + val);
     int slotNum = getStackSlots(dst);
     int offset = -8 * slotNum;
-    out.bufferCode("movq $" + val + ", %r10");
+
+    if (val.getType().equivalent(new IntType())) {
+      long value = ((IntegerConstant) val).getValue();
+      out.bufferCode("movq $" + value + ", %r10");
+    } else {
+      boolean value = ((BooleanConstant) val).getValue();
+      if (value){
+        out.bufferCode("movq $" + 1 + ", %r10");
+      } else {
+        out.bufferCode("movq $" + 0 + ", %r10");
+      }
+
+    }
+
     out.bufferCode("movq %r10, " + offset + "(%rbp)");
   }
 
@@ -141,14 +210,37 @@ public final class CodeGen extends InstVisitor {
   public void visit(LoadInst i) {}
 
   public void visit(NopInst i) {
-    out.bufferCode("// NOP");
+    //out.bufferCode("// NOP");
   }
 
   public void visit(StoreInst i) {}
 
   public void visit(ReturnInst i) {}
 
-  public void visit(CallInst i) {}
+  public void moveRegToVar(String reg, Variable var) {
+    int offset = getStackSlots(var) * 8;
+//    out.bufferCode("movq " + reg + ", -" + (offset * 8) + "(%rbp)");
+    out.bufferCode("movq -" + (offset) + "(%rbp), " + reg);
+  }
+
+  public void visit(CallInst i) {
+    out.bufferCode("/*** CallInst ***/");
+    int argIndex = 0;
+
+    for (Value val : i.getParams()) {
+      if (argIndex < stackCount) {
+        moveRegToVar(argRegisters[argIndex], (Variable) val);
+      } else {
+        int index = argIndex - argRegisters.length;
+        out.bufferCode("movq " + (8 * index + 16) + "(%rbp), %r10");
+        moveRegToVar("r10", (Variable) val);
+      }
+      ++argIndex;
+    }
+
+    out.bufferCode("call _" + i.getCallee().getName());
+
+  }
 
   public void visit(UnaryNotInst i) {}
 }

@@ -1,4 +1,1 @@
-    .globl _main
-    _main:
-    enter $(8 * 0), $0
-    // NOP
+    .comm a, 8, 8
