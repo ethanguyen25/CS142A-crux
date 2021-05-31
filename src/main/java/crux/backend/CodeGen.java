@@ -104,8 +104,14 @@ public final class CodeGen extends InstVisitor {
       int slot = getStackSlots(e);
 //      ++stackCount;
       if (i < 6) {
-        out.bufferCode("movq " + argRegisters[i] + ", " + (-8 * slot) + "(%rbp)");
-      }
+        out.bufferCode("movq " + argRegisters[i] + ", " + (-8 * slot) + "(%rbp)"); }
+//      } else {
+//        int index = i - argRegisters.length;
+//        out.bufferCode("movq " + (8 * index + 16) + "(%rbp), %r10");
+////        moveRegToVar("%r10", (Variable) val);
+//        int valOffset = getStackSlots(e);
+//        out.bufferCode("movq %r10, -" + valOffset + "(%rbp)");
+//      }
       ++i;
     }
 
@@ -117,12 +123,11 @@ public final class CodeGen extends InstVisitor {
       Instruction currInst = dfsStack.pop();
 
       if ((currlabelMap.containsKey(currInst)) && (!visited.contains(currInst))){
-
-
         String jmplabel = currlabelMap.get(currInst);
         out.bufferLabel(jmplabel + ":");
       }
 
+//      out.bufferCode("currInst = " + currInst);
       visited.add(currInst);
       currInst.accept(this);
       if (currInst.numNext() != 0){
@@ -149,6 +154,9 @@ public final class CodeGen extends InstVisitor {
           out.bufferCode("leave");
           out.bufferCode("ret");
           ++leaveRet;
+        }
+        if (currlabelMap.containsKey(currInst)){
+          leaveRet = 0;
         }
 
       }
@@ -432,12 +440,14 @@ public final class CodeGen extends InstVisitor {
     int argIndex = 0;
 
     for (Value val : i.getParams()) {
-      if (argIndex < stackCount) {
+      if (argIndex < argRegisters.length) {
         moveRegToVar(argRegisters[argIndex], (Variable) val);
       } else {
         int index = argIndex - argRegisters.length;
         out.bufferCode("movq " + (8 * index + 16) + "(%rbp), %r10");
-        moveRegToVar("%r10", (Variable) val);
+//        moveRegToVar("%r10", (Variable) val);
+        int valOffset = getStackSlots((Variable) val);
+        out.bufferCode("movq %r10, -" + valOffset + "(%rbp)");
       }
       ++argIndex;
     }
