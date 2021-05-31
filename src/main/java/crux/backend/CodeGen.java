@@ -45,8 +45,11 @@ public final class CodeGen extends InstVisitor {
 
       if (functIt.hasNext()){
         out.outputBuffer();
-        out.printCode("leave");
-        out.printCode("ret");
+        if (leaveRet == 0){
+          out.printCode("leave");
+          out.printCode("ret");
+        }
+        leaveRet = 0;
       }
 
     }
@@ -98,57 +101,62 @@ public final class CodeGen extends InstVisitor {
 
     int i = 0;
     for (var e: f.getArguments()) {
-      ++stackCount;
+      int slot = getStackSlots(e);
+//      ++stackCount;
       if (i < 6) {
-        out.bufferCode("movq " + argRegisters[i] + ", " + (-8 * stackCount) + "(%rbp)");
+        out.bufferCode("movq " + argRegisters[i] + ", " + (-8 * slot) + "(%rbp)");
       }
       ++i;
     }
 
-//    while (inst != null){
-//      inst.accept(this);
-//      inst = inst.getNext(0);
-//    }
-
 
     //Depth-First-Search
     dfsStack.push(inst);
-    String lbl = "";
+
     while (!dfsStack.isEmpty() && inst.getNext(0) != null){
       Instruction currInst = dfsStack.pop();
+
+      if ((currlabelMap.containsKey(currInst)) && (!visited.contains(currInst))){
+
+
+        String jmplabel = currlabelMap.get(currInst);
+        out.bufferLabel(jmplabel + ":");
+      }
+
       visited.add(currInst);
+      currInst.accept(this);
+      if (currInst.numNext() != 0){
+        Instruction next = currInst.getNext(0);
 
-      if (currlabelMap.containsKey(currInst)){
+//        if (next.getClass().equals(ReturnInst.class)){
+//          int dstSlot = getStackSlots(((ReturnInst) next).getReturnValue());
+//          int dstOffset = (-8 * dstSlot);
+//          out.bufferCode("movq %rax, " + dstOffset + "(%rbp)");
+//        }
 
-        if (currlabelMap.size() == 1) {
+        if (!visited.contains(next)){
+          dfsStack.push(next);
+        } else {
+          String jmplabel = currlabelMap.get(next);
+          if (jmplabel != null) {
+            out.bufferCode("jmp " + jmplabel);
+            currlabelMap.remove(next, jmplabel);
+          }
+
+        }
+      } else {
+        if (leaveRet == 0){
           out.bufferCode("leave");
           out.bufferCode("ret");
           ++leaveRet;
         }
 
-        String jmplabel = currlabelMap.get(currInst);
-        out.bufferLabel(jmplabel + ":");
-        if (currlabelMap.size() == 2){
-          lbl = jmplabel;
-        }
-        currlabelMap.remove(currInst, jmplabel);
-      }
-
-      currInst.accept(this);
-      if (currInst.numNext() != 0){
-        Instruction next = currInst.getNext(0);
-        if (!visited.contains(next)){
-          dfsStack.push(next);
-        }
       }
     }
-    if (!lbl.equals("")){
-      out.bufferCode("jmp " + lbl);
-    }
 
 
-    out.printCode(".globl _" + f.getName());
-    out.printLabel("_" + f.getName() + ":");
+    out.printCode(".globl " + f.getName());
+    out.printLabel(f.getName() + ":");
     int numSlots = stackCount;
     numSlots = (numSlots + 1) &  ~1;
     out.printCode("enter $(8 * " + numSlots + "), $0");
@@ -310,7 +318,21 @@ public final class CodeGen extends InstVisitor {
         long value = ((IntegerConstant) val).getValue();
         out.bufferCode("movq $" + value + ", %r10");
       } else {
-        out.bufferCode("movq " + (-8 * stackCount) + "(%rbp), %r10");
+//        out.bufferCode("dst = " + dst);
+//        out.bufferCode("val = " + val);
+        int valSlot = getStackSlots((Variable) val);
+        out.bufferCode("movq " + (-8 * valSlot) + "(%rbp), %r10");
+//        int before = stackCount;
+//        int dstSlot = getStackSlots(dst);
+//        int after = stackCount;
+//        if (before == after){
+//          out.bufferCode("movq " + (-8 * dstSlot) + "(%rbp), %r10");
+//        } else {
+//          int valSlot = getStackSlots((Variable) val);
+//          out.bufferCode("movq " + (-8 * valSlot) + "(%rbp), %r10");
+//        }
+
+
       }
 
     } else {
@@ -390,9 +412,12 @@ public final class CodeGen extends InstVisitor {
     int retSlot = getStackSlots(retValue);
     int retOffset = -8 * retSlot;
 
+//    out.bufferCode("movq %rax, " + retOffset + "(%rbp)");
+
     out.bufferCode("movq " + retOffset + "(%rbp), %rax");
-//    out.bufferCode("leave");
-//    out.bufferCode("ret");
+    out.bufferCode("leave");
+    out.bufferCode("ret");
+    ++leaveRet;
 
   }
 
@@ -418,10 +443,16 @@ public final class CodeGen extends InstVisitor {
     }
 
 
-    out.bufferCode("call _" + i.getCallee().getName());
+    out.bufferCode("call " + i.getCallee().getName());
+
+    int before = varMap.size();
     int dstSlot = getStackSlots(i.getDst());
-    int dstOffset = (-8 * dstSlot);
-    out.bufferCode("movq %rax, " + dstOffset + "(%rbp)");
+    int after = varMap.size();
+    if (before != after){
+      int dstOffset = (-8 * dstSlot);
+      out.bufferCode("movq %rax, " + dstOffset + "(%rbp)");
+    }
+
 
 
   }
